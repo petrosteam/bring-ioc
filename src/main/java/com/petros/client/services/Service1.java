@@ -11,6 +11,7 @@ public class Service1 {
     public String getServiceName() {
         System.out.println("s1 service");
         System.out.println(s2.getServiceName() + " included");
-        return "s1";
+        return "s1+s2";
     }
+
 }
