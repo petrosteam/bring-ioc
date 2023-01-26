@@ -30,7 +30,7 @@ class AnnotatedBeanDefinitionReaderTest {
     @Order(1)
     @DisplayName("AnnotatedBeanDefinitionReader instance exists")
     void annotatedBeanDefinitionReaderClassExists() {
-        assertThat(Optional.ofNullable(beanDefinitionReader)).isNotNull();
+        assertThat(beanDefinitionReader).isNotNull();
     }
 
     @Test
