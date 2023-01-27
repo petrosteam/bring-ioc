@@ -3,37 +3,46 @@ package com.pertos.bring.reader.impl;
 import com.pertos.bring.reader.BeanDefinition;
 import com.pertos.bring.reader.BeanDefinitionRegistry;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+/**
+ * The type Bean definition registry.
+ * holds a map of names - BeanDefinitions
+ */
 public class BeanDefinitionRegistryImpl implements BeanDefinitionRegistry {
+    private final Map<String, BeanDefinition> beanDefinitionMap;
 
-    private final Set<BeanDefinition> beanDefinitionContext;
 
-    public BeanDefinitionRegistryImpl(Set<BeanDefinition> beanDefinitionContext) {
-        this.beanDefinitionContext = beanDefinitionContext;
+    public BeanDefinitionRegistryImpl() {
+        beanDefinitionMap = new HashMap<>();
     }
 
     @Override
     public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) {
-        beanDefinitionContext.add(beanDefinition);
+        beanDefinitionMap.put(beanName, beanDefinition);
     }
 
     public void registerBeanDefinitionAll(Set<BeanDefinition> beanDefinitions) {
-        beanDefinitionContext.addAll(beanDefinitions);
+        beanDefinitionMap.putAll(beanDefinitions.stream()
+                .collect(Collectors.toMap(BeanDefinition::getName, Function.identity())));
     }
 
     @Override
     public void removeBeanDefinition(String beanName) {
-        beanDefinitionContext.removeIf(bd -> bd.getName().equals(beanName));
+        beanDefinitionMap.remove(beanName);
     }
 
     @Override
     public BeanDefinition getBeanDefinition(String beanName) {
-        return beanDefinitionContext.stream().filter(bd -> bd.getName().equals(beanName)).findFirst().orElseThrow();
+        return beanDefinitionMap.get(beanName);
     }
 
     @Override
     public String[] getBeanDefinitionNames() {
-        return beanDefinitionContext.stream().map(BeanDefinition::getName).toArray(String[]::new);
+        return beanDefinitionMap.keySet().toArray(String[]::new);
     }
 }
