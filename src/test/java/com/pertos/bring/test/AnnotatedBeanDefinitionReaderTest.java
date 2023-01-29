@@ -4,9 +4,9 @@ import com.pertos.bring.reader.BeanDefinitionReader;
 import com.pertos.bring.reader.BeanDefinitionRegistry;
 import com.pertos.bring.reader.impl.AnnotatedBeanDefinitionReader;
 import com.pertos.bring.reader.impl.BeanDefinitionImpl;
+import com.pertos.bring.reader.impl.BeanDefinitionRegistryImpl;
+import com.pertos.bring.reader.impl.JavaBeanDefinitionReader;
 import org.junit.jupiter.api.*;
-
-import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -14,30 +14,33 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class AnnotatedBeanDefinitionReaderTest {
 
-    BeanDefinitionReader beanDefinitionReader;
+    BeanDefinitionReader annotatedBeanDefinitionReader;
+    BeanDefinitionReader javaBeanDefinitionReader;
     BeanDefinitionRegistry beanDefinitionRegistry;
 
     private static final String BASE_PACKAGE = "com.pertos.bring";
 
     @BeforeEach
     public void init() {
-        beanDefinitionReader = AnnotatedBeanDefinitionReader.getInstance();
-        beanDefinitionReader.loadBeanDefinitions(BASE_PACKAGE);
-        beanDefinitionRegistry = beanDefinitionReader.getBeanDefinitionRegistry();
+        beanDefinitionRegistry = new BeanDefinitionRegistryImpl();
+        annotatedBeanDefinitionReader = new AnnotatedBeanDefinitionReader(beanDefinitionRegistry);
+        annotatedBeanDefinitionReader.loadBeanDefinitions(BASE_PACKAGE);
+        javaBeanDefinitionReader = new JavaBeanDefinitionReader(beanDefinitionRegistry);
+        javaBeanDefinitionReader.loadBeanDefinitions(BASE_PACKAGE);
     }
 
     @Test
     @Order(1)
     @DisplayName("AnnotatedBeanDefinitionReader instance exists")
     void annotatedBeanDefinitionReaderClassExists() {
-        assertThat(beanDefinitionReader).isNotNull();
+        assertThat(annotatedBeanDefinitionReader).isNotNull();
     }
 
     @Test
     @Order(2)
     @DisplayName("Loaded bean definitions number")
     void checkBeanDifinitionLoadNumber() {
-        assertThat(beanDefinitionReader.loadBeanDefinitions(BASE_PACKAGE)).isEqualTo(4);
+        assertThat(annotatedBeanDefinitionReader.loadBeanDefinitions(BASE_PACKAGE)).isEqualTo(4);
     }
 
     @Test
