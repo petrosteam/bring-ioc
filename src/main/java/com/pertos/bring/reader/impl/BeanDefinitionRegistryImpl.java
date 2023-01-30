@@ -28,7 +28,7 @@ public class BeanDefinitionRegistryImpl implements BeanDefinitionRegistry {
 
     public void registerBeanDefinitionAll(Set<BeanDefinition> beanDefinitions) {
         beanDefinitionMap.putAll(beanDefinitions.stream()
-                .collect(Collectors.toMap(BeanDefinition::getName, Function.identity())));
+                .collect(Collectors.toMap(BeanDefinition::getBeanClassName, Function.identity())));
     }
 
     @Override

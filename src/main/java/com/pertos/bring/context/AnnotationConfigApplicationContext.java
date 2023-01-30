@@ -23,8 +23,9 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
         if (context.containsKey(beanType)) {
             return (T) context.get(beanType);
         }
-        BeanDefinition beanDefinition = registry.getBeanDefinition(beanType.getSimpleName());
+        BeanDefinition beanDefinition = registry.getBeanDefinition(beanType.getName());
         Object bean = createBean(beanType, beanDefinition);
+        context.put(beanType, bean);
         return (T) bean;
     }
 
