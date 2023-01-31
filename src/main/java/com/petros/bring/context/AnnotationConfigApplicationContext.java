@@ -2,32 +2,42 @@ package com.petros.bring.context;
 
 import com.petros.bring.bean.factory.AnnotationBeanFactory;
 import com.petros.bring.exception.BeanDefinitionOverrideException;
+import com.petros.bring.postprocessor.BeanPostProcessor;
 import com.petros.bring.reader.BeanDefinition;
 import com.petros.bring.reader.BeanDefinitionRegistry;
+import com.petros.bring.reader.Scope;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class AnnotationConfigApplicationContext extends AnnotationBeanFactory {
 
-    private final BeanDefinitionRegistry registry;
-
-    public AnnotationConfigApplicationContext(BeanDefinitionRegistry registry) {
-        this.registry = registry;
+    public AnnotationConfigApplicationContext(BeanDefinitionRegistry registry, List<BeanPostProcessor> beanPostProcessors) {
+        super(registry, beanPostProcessors);
         Arrays.stream(registry.getBeanDefinitionNames())
                 .map(registry::getBeanDefinition)
                 .forEach(this::registerBean);
     }
 
     private void registerBean(BeanDefinition beanDefinition) {
-        var beanName = beanDefinition.getName();
-        var existingBeanDefinition = rootContextMap.get(beanName);
-        if (existingBeanDefinition != null) {
-            throw new BeanDefinitionOverrideException(String.format(
-                    "Cannot register bean definition [%s] for bean '%s': There is already [%s] bound.",
-                    beanDefinition, beanName, existingBeanDefinition
-            ));
+        validate(beanDefinition);
+        try {
+            getBean(Class.forName(beanDefinition.getBeanClassName()));
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
         }
-        rootContextMap.put(beanName, beanDefinition);
     }
 
+    private static void validate(BeanDefinition beanDefinition) {
+        if (Scope.PROTOTYPE.equals(beanDefinition.getScope())) {
+            return;
+        }
+        var existingBean = rootContextMap.get(beanDefinition.getName());
+        if (existingBean != null) {
+            throw new BeanDefinitionOverrideException(String.format(
+                    "Cannot register bean definition [%s] for bean '%s': There is already [%s] bound.",
+                    beanDefinition, beanDefinition.getName(), existingBean
+            ));
+        }
+    }
 }
