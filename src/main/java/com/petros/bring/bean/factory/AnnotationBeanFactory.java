@@ -67,18 +67,12 @@ public class AnnotationBeanFactory implements BeanFactory {
                 obj = beanType.getConstructor().newInstance();
             }
             for (BeanPostProcessor postProcessor : beanPostProcessors) {
-                postProcessor.postProcessBeforeInitialization(beanType, obj);
+                postProcessor.postProcessBeforeInitialization(beanType, obj, this);
                 postProcessor.postProcessAfterInitialization(beanType, obj);
             }
             rootContextMap.put(beanDefinition.getName(), obj);
             return obj;
-        } catch (InstantiationException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        } catch (InvocationTargetException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchMethodException e) {
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
     }
