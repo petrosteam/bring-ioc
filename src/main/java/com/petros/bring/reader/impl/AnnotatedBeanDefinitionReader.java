@@ -12,15 +12,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.reflections.Reflections;
 
+import java.lang.reflect.Constructor;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 
 /**
  * The type Annotated bean definition reader.
  * scans class from provided package and
  * registers them into BeanDefinitionRegistry
  */
+@Component
 public class AnnotatedBeanDefinitionReader implements BeanDefinitionReader {
 
     private final BeanDefinitionRegistry beanDefinitionRegistry;
@@ -61,7 +63,17 @@ public class AnnotatedBeanDefinitionReader implements BeanDefinitionReader {
                 .withScope(getBeanScope(aClass))
                 .withIsLazy(isLazy(aClass))
                 .withIsPrimary(isPrimary(aClass))
+                .withDependsOn(getDependsOn(aClass))
                 .createBeanDefinitionImpl();
+    }
+
+    private String[] getDependsOn(Class<?> aClass) {
+        return Arrays.stream(aClass.getConstructors())
+                .findAny()
+                .map(Constructor::getParameterTypes)
+                .map(Arrays::stream)
+                .map(stream -> stream.map(clazz -> clazz.getName()).toList().toArray(new String[]{}))
+                .orElse(new String[]{});
     }
 
     private boolean isPrimary(Class<?> aClass) {

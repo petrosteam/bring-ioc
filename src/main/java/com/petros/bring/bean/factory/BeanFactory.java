@@ -12,4 +12,6 @@ public interface BeanFactory {
     <T> T getBean(String name, Class<T> beanType) throws NoSuchBeanException, NoUniqueBeanException;
 
     <T> Map<String, T> getAllBeans(Class<T> beanType);
+
+    Map<String, Object> getRootMap();
 }

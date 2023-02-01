@@ -1,5 +1,6 @@
 package com.petros.bring.reader.impl;
 
+import com.petros.bring.annotations.Component;
 import com.petros.bring.reader.BeanDefinition;
 import com.petros.bring.reader.BeanDefinitionRegistry;
 
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
  * The type Bean definition registry.
  * holds a map of names - BeanDefinitions
  */
+@Component
 public class BeanDefinitionRegistryImpl implements BeanDefinitionRegistry {
     private final Map<String, BeanDefinition> beanDefinitionMap;
 

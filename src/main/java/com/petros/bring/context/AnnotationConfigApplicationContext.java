@@ -1,43 +1,27 @@
 package com.petros.bring.context;
 
+import com.petros.bring.annotations.Component;
 import com.petros.bring.bean.factory.AnnotationBeanFactory;
-import com.petros.bring.exception.BeanDefinitionOverrideException;
-import com.petros.bring.postprocessor.BeanPostProcessor;
-import com.petros.bring.reader.BeanDefinition;
 import com.petros.bring.reader.BeanDefinitionRegistry;
-import com.petros.bring.reader.Scope;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.stream.Collectors;
 
+import static com.petros.bring.Utils.*;
+
+@Component(name = "annotationConfigApplicationContext")
 public class AnnotationConfigApplicationContext extends AnnotationBeanFactory {
 
-    public AnnotationConfigApplicationContext(BeanDefinitionRegistry registry, List<BeanPostProcessor> beanPostProcessors) {
-        super(registry, beanPostProcessors);
-        Arrays.stream(registry.getBeanDefinitionNames())
+    public AnnotationConfigApplicationContext(BeanDefinitionRegistry registry) {
+        super(registry);
+        register(registry);
+    }
+
+    public void register(BeanDefinitionRegistry registry) {
+        var beans = Arrays.stream(registry.getBeanDefinitionNames())
                 .map(registry::getBeanDefinition)
-                .forEach(this::registerBean);
-    }
-
-    private void registerBean(BeanDefinition beanDefinition) {
-        validate(beanDefinition);
-        try {
-            getBean(Class.forName(beanDefinition.getBeanClassName()));
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static void validate(BeanDefinition beanDefinition) {
-        if (Scope.PROTOTYPE.equals(beanDefinition.getScope())) {
-            return;
-        }
-        var existingBean = rootContextMap.get(beanDefinition.getName());
-        if (existingBean != null) {
-            throw new BeanDefinitionOverrideException(String.format(
-                    "Cannot register bean definition [%s] for bean '%s': There is already [%s] bound.",
-                    beanDefinition, beanDefinition.getName(), existingBean
-            ));
-        }
+                .map(this::create)
+                .collect(Collectors.toSet());
+        beans.forEach(bean -> postProcessBean(getClassByName(bean.getClass().getName()), bean));
     }
 }

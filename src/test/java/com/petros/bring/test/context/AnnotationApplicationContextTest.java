@@ -15,7 +15,7 @@ public class AnnotationApplicationContextTest {
 
     @BeforeAll
     public static void setUp() {
-        applicationContext = new AnnotationConfigApplicationContext(registry, beanPostProcessors);
+        applicationContext = new AnnotationConfigApplicationContext(registry);
     }
 
 }
