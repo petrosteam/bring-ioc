@@ -21,11 +21,7 @@ public class AnnotationConfigApplicationContext extends AnnotationBeanFactory {
 
     private void registerBean(BeanDefinition beanDefinition) {
         validate(beanDefinition);
-        try {
-            getBean(Class.forName(beanDefinition.getBeanClassName()));
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        getBean(registry.getBeanTypeByName(beanDefinition.getName()));
     }
 
     private static void validate(BeanDefinition beanDefinition) {

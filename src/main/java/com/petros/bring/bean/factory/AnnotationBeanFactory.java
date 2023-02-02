@@ -5,9 +5,9 @@ import com.petros.bring.exception.NoUniqueBeanException;
 import com.petros.bring.postprocessor.BeanPostProcessor;
 import com.petros.bring.reader.BeanDefinition;
 import com.petros.bring.reader.BeanDefinitionRegistry;
+import com.petros.bring.reader.Scope;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,33 +27,26 @@ public class AnnotationBeanFactory implements BeanFactory {
 
     @Override
     public <T> T getBean(Class<T> beanType) throws NoSuchBeanException, NoUniqueBeanException {
-        Set<BeanDefinition> beanDefinitions = getBeanDefinitionsByType(beanType);
-        // check for Scope.prototype
         Map<String, T> matchingBeans = getAllBeans(beanType);
         if (matchingBeans.size() > 1) {
-            return getPrimary(beanType, matchingBeans);
+            return getPrimaryRegisteredBean(beanType, matchingBeans);
         }
+
         return matchingBeans.values().stream()
                 .findFirst()
-                .orElseGet(() -> createBean(beanType, beanDefinitions));
+                .orElseGet(() -> createBean(beanType));
     }
 
-    private <T> Set<BeanDefinition> getBeanDefinitionsByType(Class<T> beanType) {
-        return Arrays.stream(registry.getBeanDefinitionNames())
-                .map(registry::getBeanDefinition)
-                .filter(beanDefinition -> {
-                    try {
-                        return beanType.isAssignableFrom(Class.forName(beanDefinition.getBeanClassName()));
-                    } catch (ClassNotFoundException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .collect(Collectors.toSet());
-    }
-
-    private <T> T createBean(Class<T> beanType, Set<BeanDefinition> beanDefinitions) {
+    private <T> T createBean(Class<T> beanType) {
         try {
-            BeanDefinition beanDefinition = beanDefinitions.stream().findFirst().orElseThrow();
+            Set<BeanDefinition> beanDefinitionByType = registry.getBeanDefinitionByType(beanType);
+            if (beanDefinitionByType.isEmpty()) {
+                throw new NoSuchBeanException("Could not create bean of type " + beanType.getName());
+            }
+            BeanDefinition beanDefinition = beanDefinitionByType.size() > 1
+                    ? getPrimaryBeanDefinition(beanType, beanDefinitionByType)
+                    : beanDefinitionByType.stream().findFirst().get();
+
             T obj = null;
             if (beanDefinition.getDependsOn() != null) {
 //                Map<String, Object> beansByName = new HashMap<>();
@@ -70,6 +63,9 @@ public class AnnotationBeanFactory implements BeanFactory {
                 postProcessor.postProcessBeforeInitialization(beanType, obj, this);
                 postProcessor.postProcessAfterInitialization(beanType, obj);
             }
+            if (beanDefinition.getScope().equals(Scope.PROTOTYPE)) {
+                return obj;
+            }
             rootContextMap.put(beanDefinition.getName(), obj);
             return obj;
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
@@ -77,7 +73,17 @@ public class AnnotationBeanFactory implements BeanFactory {
         }
     }
 
-    private <T> T getPrimary(Class<T> beanType, Map<String, T> matchingBeans) {
+    private <T> BeanDefinition getPrimaryBeanDefinition(Class<T> beanType, Set<BeanDefinition> beanDefinitionByType) {
+        Set<BeanDefinition> primaryBeanDefinitions = beanDefinitionByType.stream()
+                .filter(BeanDefinition::isPrimary)
+                .collect(Collectors.toSet());
+        if (primaryBeanDefinitions.size() != 1) {
+            throw new NoUniqueBeanException("Could not create bean of type " + beanType.getName() + ".");
+        }
+        return primaryBeanDefinitions.stream().findFirst().get();
+    }
+
+    private <T> T getPrimaryRegisteredBean(Class<T> beanType, Map<String, T> matchingBeans) {
         Set<Map.Entry<String, T>> primaryMatchingBeans = matchingBeans.entrySet().stream()
                 .filter(entry -> registry.getBeanDefinition(entry.getKey()).isPrimary())
                 .collect(Collectors.toSet());

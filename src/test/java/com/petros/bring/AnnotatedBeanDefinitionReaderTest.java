@@ -1,4 +1,4 @@
-package com.petros.bring.test;
+package com.petros.bring;
 
 import com.petros.bring.reader.BeanDefinitionReader;
 import com.petros.bring.reader.BeanDefinitionRegistry;
@@ -18,7 +18,7 @@ class AnnotatedBeanDefinitionReaderTest {
     BeanDefinitionReader javaBeanDefinitionReader;
     BeanDefinitionRegistry beanDefinitionRegistry;
 
-    private static final String BASE_PACKAGE = "com.petros.bring";
+    private static final String BASE_PACKAGE = "com.petros.bring.model";
 
     @BeforeEach
     public void init() {
@@ -96,7 +96,7 @@ class AnnotatedBeanDefinitionReaderTest {
     @Order(9)
     @DisplayName("Register new bean definition")
     void checkNewBeanDefinitionRegister() {
-        beanDefinitionRegistry.registerBeanDefinition("newComer",
+        beanDefinitionRegistry.registerBeanDefinition("newComer".getClass(),
                 BeanDefinitionImpl.BeanDefinitionBuilder.newInstance()
                         .withBeanClassName("className")
                         .withName("newComer")

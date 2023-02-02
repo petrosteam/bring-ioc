@@ -36,17 +36,13 @@ public class JavaBeanDefinitionReader implements BeanDefinitionReader {
     @Override
     public int loadBeanDefinitions(String location) throws BeanDefinitionStoreException {
         Reflections reflections = new Reflections(location);
-        beanDefinitionRegistry.registerBeanDefinitionAll(loadBeanDefinitionsByConfigClass(reflections));
-        return beanDefinitionRegistry.getBeanDefinitionNames().length;
-    }
-
-    private Set<BeanDefinition> loadBeanDefinitionsByConfigClass(Reflections reflections) {
         Set<Class<?>> annotatedClasses = reflections.getTypesAnnotatedWith(Configuration.class);
-        return annotatedClasses.stream()
+        annotatedClasses.stream()
                 .flatMap(aClass -> Arrays.stream(aClass.getDeclaredMethods()))
                 .filter(method -> method.isAnnotationPresent(Component.class))
-                .map(this::createBeanDefinition)
-                .collect(Collectors.toSet());
+                .forEach(method -> beanDefinitionRegistry
+                        .registerBeanDefinition(method.getReturnType(), createBeanDefinition(method)));
+        return beanDefinitionRegistry.getBeanDefinitionNames().length;
     }
 
     private BeanDefinition createBeanDefinition(Method method) {

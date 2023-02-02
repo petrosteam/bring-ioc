@@ -1,11 +1,10 @@
-package com.petros.bring.test.model;
+package com.petros.bring.model;
 
 import com.petros.bring.annotations.Component;
 import com.petros.bring.annotations.Lazy;
 import com.petros.bring.annotations.Primary;
-import com.petros.bring.reader.Scope;
 
-@Component(name = "booblik", scope = Scope.PROTOTYPE)
+@Component(name = "booblik")
 @Lazy
 @Primary
 public class SimpleService implements Service {
