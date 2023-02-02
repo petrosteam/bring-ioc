@@ -1,5 +1,6 @@
 package com.petros.bring.reader.impl;
 
+import com.petros.bring.annotations.Bean;
 import com.petros.bring.annotations.Component;
 import com.petros.bring.annotations.Lazy;
 import com.petros.bring.annotations.Primary;
@@ -40,6 +41,7 @@ public class AnnotatedBeanDefinitionReader implements BeanDefinitionReader {
     public int loadBeanDefinitions(String location) throws BeanDefinitionStoreException {
         Reflections reflections = new Reflections(location);
         beanDefinitionRegistry.registerBeanDefinitionAll(loadBeanDefinitionsByComponentTypes(reflections));
+        beanDefinitionRegistry.registerBeanDefinitionAll(loadBeanDefinitionsByBeanTypes(reflections));
         return beanDefinitionRegistry.getBeanDefinitionNames().length;
     }
 
@@ -49,6 +51,13 @@ public class AnnotatedBeanDefinitionReader implements BeanDefinitionReader {
 
     private Set<BeanDefinition> loadBeanDefinitionsByComponentTypes(Reflections reflections) {
         Set<Class<?>> annotatedClasses = reflections.getTypesAnnotatedWith(Component.class);
+        return annotatedClasses.stream()
+                .map(this::createBeanDefinition)
+                .collect(Collectors.toSet());
+    }
+
+    private Set<BeanDefinition> loadBeanDefinitionsByBeanTypes(Reflections reflections) {
+        Set<Class<?>> annotatedClasses = reflections.getTypesAnnotatedWith(Bean.class);
         return annotatedClasses.stream()
                 .map(this::createBeanDefinition)
                 .collect(Collectors.toSet());
@@ -73,12 +82,18 @@ public class AnnotatedBeanDefinitionReader implements BeanDefinitionReader {
     }
 
     private Scope getBeanScope(Class<?> aClass) {
-        return aClass.getAnnotation(Component.class).scope();
+        Scope scope = aClass.getAnnotation(Component.class).scope();
+        if (scope == null) {
+            scope = aClass.getAnnotation(Bean.class).scope();
+        }
+        return scope;
     }
 
     private String getBeanName(Class<?> aClass) {
         String name = aClass.getAnnotation(Component.class).name();
+        if (name == null) {
+            name = aClass.getAnnotation(Bean.class).name();
+        }
         return StringUtils.isEmpty(name) ? StringUtils.uncapitalize(aClass.getSimpleName()) : name;
     }
-
 }
