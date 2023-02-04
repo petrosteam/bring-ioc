@@ -20,14 +20,20 @@ import java.util.stream.Collectors;
 @Component
 public class BeanDefinitionRegistryImpl implements BeanDefinitionRegistry {
     private final Map<String, BeanDefinition> beanDefinitionMap;
+    private final Map<Class<?>, BeanDefinition> beanDefinitionsByType;
 
 
     public BeanDefinitionRegistryImpl() {
         beanDefinitionMap = new HashMap<>();
+        beanDefinitionsByType = new HashMap<>();
     }
 
     @Override
-    public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) {
+    public void registerBeanDefinition(Class<?> beanType, BeanDefinition beanDefinition) {
+        beanDefinitionMap.put(beanDefinition.getName(), beanDefinition);
+        beanDefinitionsByType.put(beanType, beanDefinition);
+
+        public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) {
         validate(beanName);
         beanDefinitionMap.put(beanName, beanDefinition);
     }
@@ -45,6 +51,21 @@ public class BeanDefinitionRegistryImpl implements BeanDefinitionRegistry {
     @Override
     public BeanDefinition getBeanDefinition(String beanName) {
         return beanDefinitionMap.get(beanName);
+    }
+
+    public Class<?> getBeanTypeByName(String name) {
+        return beanDefinitionsByType.entrySet().stream()
+                .filter(entry -> entry.getValue().getName().equals(name))
+                .map(Map.Entry::getKey)
+                .findFirst().orElseThrow();
+    }
+
+    @Override
+    public Set<BeanDefinition> getBeanDefinitionByType(Class<?> beanType) {
+        return beanDefinitionsByType.entrySet().stream()
+                .filter(entry -> entry.getKey().isAssignableFrom(beanType))
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toSet());
     }
 
     @Override

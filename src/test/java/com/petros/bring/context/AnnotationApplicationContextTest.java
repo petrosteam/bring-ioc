@@ -1,4 +1,4 @@
-package com.petros.bring.test.context;
+package com.petros.bring.context;
 
 import com.petros.bring.context.AnnotationConfigApplicationContext;
 import com.petros.bring.postprocessor.BeanPostProcessor;

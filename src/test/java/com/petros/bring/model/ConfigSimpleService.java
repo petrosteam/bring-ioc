@@ -1,4 +1,4 @@
-package com.petros.bring.test.model;
+package com.petros.bring.model;
 
 public class ConfigSimpleService implements Service{
     @Override

@@ -17,6 +17,11 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toMap;
+
+
 /**
  * The type Annotated bean definition reader.
  * scans class from provided package and
@@ -41,19 +46,14 @@ public class AnnotatedBeanDefinitionReader implements BeanDefinitionReader {
     @Override
     public int loadBeanDefinitions(String location) throws BeanDefinitionStoreException {
         Reflections reflections = new Reflections(location);
-        beanDefinitionRegistry.registerBeanDefinitionAll(loadBeanDefinitionsByComponentTypes(reflections));
+        Set<Class<?>> annotatedClasses = reflections.getTypesAnnotatedWith(Component.class);
+        annotatedClasses
+                .forEach(clazz -> beanDefinitionRegistry.registerBeanDefinition(clazz, createBeanDefinition(clazz)));
         return beanDefinitionRegistry.getBeanDefinitionNames().length;
     }
 
     public BeanDefinitionRegistry getBeanDefinitionRegistry() {
         return beanDefinitionRegistry;
-    }
-
-    private Set<BeanDefinition> loadBeanDefinitionsByComponentTypes(Reflections reflections) {
-        Set<Class<?>> annotatedClasses = reflections.getTypesAnnotatedWith(Component.class);
-        return annotatedClasses.stream()
-                .map(this::createBeanDefinition)
-                .collect(Collectors.toSet());
     }
 
     private BeanDefinition createBeanDefinition(Class<?> aClass) {

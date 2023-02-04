@@ -23,7 +23,7 @@ public class AnnotationBeanFactory implements BeanFactory {
     protected final BeanDefinitionRegistry registry;
     protected static final Map<String, Object> rootContextMap = new ConcurrentHashMap<>();
 
-    public AnnotationBeanFactory(BeanDefinitionRegistry registry) {
+    public AnnotationBeanFactory(BeanDefinitionRegistry registry, List<BeanPostProcessor> beanPostProcessors) {
         this.registry = registry;
     }
 
@@ -41,21 +41,19 @@ public class AnnotationBeanFactory implements BeanFactory {
         }
 
         return matchingBeans.values().stream()
-                .findFirst();
+                .findFirst()
+                .orElseGet(() -> createBean(beanType, beanDefinitions));
     }
 
-    private <T> Set<BeanDefinition> getBeanDefinitionsByType(Class<T> beanType) {
-        return Arrays.stream(registry.getBeanDefinitionNames())
-                .map(registry::getBeanDefinition)
-                .filter(beanDefinition -> {
-                    try {
-                        return beanType.isAssignableFrom(Class.forName(beanDefinition.getBeanClassName()));
-                    } catch (ClassNotFoundException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .collect(Collectors.toSet());
-    }
+    private <T> T createBean(Class<T> beanType) {
+        try {
+            Set<BeanDefinition> beanDefinitionByType = registry.getBeanDefinitionByType(beanType);
+            if (beanDefinitionByType.isEmpty()) {
+                throw new NoSuchBeanException("Could not create bean of type " + beanType.getName());
+            }
+            BeanDefinition beanDefinition = beanDefinitionByType.size() > 1
+                    ? getPrimaryBeanDefinition(beanType, beanDefinitionByType)
+                    : beanDefinitionByType.stream().findFirst().get();
 
     public <T> T create(BeanDefinition beanDefinition) {
         var bean = this.<T>createBean(beanDefinition);
@@ -120,13 +118,30 @@ public class AnnotationBeanFactory implements BeanFactory {
             } else {
                 return (T) clazz.getConstructor().newInstance();
             }
+            if (beanDefinition.getScope().equals(Scope.PROTOTYPE)) {
+                return obj;
+            }
+            rootContextMap.put(beanDefinition.getName(), obj);
+            return obj;
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
         } catch (InvocationTargetException | InstantiationException | IllegalAccessException |
                  NoSuchMethodException e) {
             throw new BeanCreationException(beanDefinition, e);
         }
     }
 
-    private <T> T getPrimary(Class<T> beanType, Map<String, T> matchingBeans) {
+    private <T> BeanDefinition getPrimaryBeanDefinition(Class<T> beanType, Set<BeanDefinition> beanDefinitionByType) {
+        Set<BeanDefinition> primaryBeanDefinitions = beanDefinitionByType.stream()
+                .filter(BeanDefinition::isPrimary)
+                .collect(Collectors.toSet());
+        if (primaryBeanDefinitions.size() != 1) {
+            throw new NoUniqueBeanException("Could not create bean of type " + beanType.getName() + ".");
+        }
+        return primaryBeanDefinitions.stream().findFirst().get();
+    }
+
+    private <T> T getPrimaryRegisteredBean(Class<T> beanType, Map<String, T> matchingBeans) {
         Set<Map.Entry<String, T>> primaryMatchingBeans = matchingBeans.entrySet().stream()
                 .filter(entry -> registry.getBeanDefinition(entry.getKey()).isPrimary())
                 .collect(Collectors.toSet());

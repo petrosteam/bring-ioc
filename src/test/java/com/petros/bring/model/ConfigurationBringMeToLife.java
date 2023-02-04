@@ -1,4 +1,4 @@
-package com.petros.bring.test.model;
+package com.petros.bring.model;
 
 import com.petros.bring.annotations.Component;
 import com.petros.bring.annotations.Configuration;
