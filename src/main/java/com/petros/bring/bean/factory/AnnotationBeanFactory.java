@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.petros.bring.Utils.getClassByName;
@@ -85,19 +86,27 @@ public class AnnotationBeanFactory implements BeanFactory {
     @SuppressWarnings("unchecked")
     private <T> T createBean(BeanDefinition beanDefinition) {
         try {
-            validate(beanDefinition);
             var clazz = getClassByName(beanDefinition.getBeanClassName());
+            if (rootContextMap.containsKey(beanDefinition.getName())) {
+                return (T) getBean(beanDefinition.getName(), clazz);
+            }
             if (beanDefinition.getDependsOn() != null && beanDefinition.getDependsOn().length != 0) {
                 var beansByType = new HashMap<>();
                 for (String dependsOnName : beanDefinition.getDependsOn()) {
                     Class<?> bClass = getClassByName(dependsOnName);
+//                    if (!rootContextMap.containsKey(dependsOnName)) {
+//                        var beanDefinitionToCreate = registry.getBeanDefinition(dependsOnName);
+//                        beanToInject = this.create(beanDefinitionToCreate);
+//                    } else {
+//                        beanToInject = rootContextMap.get(dependsOnName);
+//                    }
                     //TODO: Please, refactor me
                     Object beanToInject = null;
                     if (!this.getOptionalBean(bClass).isPresent()) {
                         beanToInject =
                                 this.getBeanDefinitionsByType(bClass).stream()
                                         .findFirst()
-                                        .map(this::createBean)
+                                        .map(this::create)
                                         .orElseThrow(
                                                 () -> new BeanCreationException("Could not create bean with type: " + bClass.getName())
                                         );
@@ -147,18 +156,5 @@ public class AnnotationBeanFactory implements BeanFactory {
     @Override
     public Map<String, Object> getRootMap() {
         return rootContextMap;
-    }
-
-    private static void validate(BeanDefinition beanDefinition) {
-        if (Scope.PROTOTYPE.equals(beanDefinition.getScope())) {
-            return;
-        }
-        var existingBean = rootContextMap.get(beanDefinition.getName());
-        if (existingBean != null) {
-            throw new BeanDefinitionOverrideException(String.format(
-                    "Cannot register bean definition [%s] for bean '%s': There is already [%s] bound.",
-                    beanDefinition, beanDefinition.getName(), existingBean
-            ));
-        }
     }
 }

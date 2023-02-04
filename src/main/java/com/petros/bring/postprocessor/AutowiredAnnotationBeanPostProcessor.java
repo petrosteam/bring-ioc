@@ -5,14 +5,15 @@ import com.petros.bring.annotations.Autowired;
 import com.petros.bring.annotations.Component;
 import com.petros.bring.bean.factory.AnnotationBeanFactory;
 import com.petros.bring.bean.factory.BeanFactory;
+import com.petros.bring.context.AnnotationConfigApplicationContext;
 
 import java.util.Arrays;
 
 @Component
 public class AutowiredAnnotationBeanPostProcessor implements BeanPostProcessor {
-    private final AnnotationBeanFactory factory;
+    private final BeanFactory factory;
 
-    public AutowiredAnnotationBeanPostProcessor(AnnotationBeanFactory beanFactory) {
+    public AutowiredAnnotationBeanPostProcessor(AnnotationConfigApplicationContext beanFactory) {
         this.factory = beanFactory;
     }
 

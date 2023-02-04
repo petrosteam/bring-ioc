@@ -12,5 +12,5 @@ public interface BeanPostProcessor {
         return bean;
     }
 
-    <T> void postProcessBeforeInitialization(Class<T> beanType, T obj, BeanFactory annotationBeanFactory);
+   // <T> void postProcessBeforeInitialization(Class<T> beanType, T obj, BeanFactory annotationBeanFactory);
 }

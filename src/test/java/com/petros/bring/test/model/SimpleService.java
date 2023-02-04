@@ -5,7 +5,7 @@ import com.petros.bring.annotations.Lazy;
 import com.petros.bring.annotations.Primary;
 import com.petros.bring.reader.Scope;
 
-@Component(name = "booblik", scope = Scope.PROTOTYPE)
+@Component(name = "booblik")
 @Lazy
 @Primary
 public class SimpleService implements Service {

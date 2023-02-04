@@ -9,14 +9,16 @@ import java.util.Arrays;
 /**
  * The type Autowire bean post processor.
  */
-public class AutowireBeanPostProcessor implements BeanPostProcessor{
+public class AutowireBeanPostProcessor
+      //  implements BeanPostProcessor
+{
     /**
      * PostProcessor which sets field up by Autowire annotation
      * @param beanType a class of a bean
      * @param obj an objects of a bean
      * @param beanFactory factory to get/create a bean
      */
-    @Override
+    //@Override
     public <T> void postProcessBeforeInitialization(Class<T> beanType, T obj, BeanFactory beanFactory) {
         Arrays.stream(beanType.getDeclaredFields())
                 .filter(field -> field.isAnnotationPresent(Autowired.class))
