@@ -27,6 +27,10 @@ public class AnnotationBeanFactory implements BeanFactory {
 
     @Override
     public <T> T getBean(Class<T> beanType) throws NoSuchBeanException, NoUniqueBeanException {
+        Set<BeanDefinition> beanDefinitions = registry.getBeanDefinitionByType(beanType);
+        if (beanDefinitions.size() > 1 ) {
+            ensureBeanDefinitionsCreated(beanDefinitions);
+        }
         Map<String, T> matchingBeans = getAllBeans(beanType);
         if (matchingBeans.size() > 1) {
             return getPrimaryRegisteredBean(beanType, matchingBeans);
@@ -35,6 +39,16 @@ public class AnnotationBeanFactory implements BeanFactory {
         return matchingBeans.values().stream()
                 .findFirst()
                 .orElseGet(() -> createBean(beanType));
+    }
+
+    private void ensureBeanDefinitionsCreated(Set<BeanDefinition> beanDefinitions) {
+        beanDefinitions.forEach(bd -> {
+            try {
+                getBean(Class.forName(bd.getBeanClassName()));
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(String.format("Not able to find class %s", bd.getBeanClassName()), e);
+            }
+        });
     }
 
     private <T> T createBean(Class<T> beanType) {
@@ -59,6 +73,7 @@ public class AnnotationBeanFactory implements BeanFactory {
             } else {
                 obj = beanType.getConstructor().newInstance();
             }
+            rootContextMap.put(beanDefinition.getName(), obj);
             for (BeanPostProcessor postProcessor : beanPostProcessors) {
                 postProcessor.postProcessBeforeInitialization(beanType, obj, this);
                 postProcessor.postProcessAfterInitialization(beanType, obj);
@@ -66,7 +81,6 @@ public class AnnotationBeanFactory implements BeanFactory {
             if (beanDefinition.getScope().equals(Scope.PROTOTYPE)) {
                 return obj;
             }
-            rootContextMap.put(beanDefinition.getName(), obj);
             return obj;
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
