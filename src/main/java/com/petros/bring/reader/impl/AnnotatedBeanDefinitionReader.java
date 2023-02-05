@@ -4,7 +4,7 @@ import com.petros.bring.annotations.Component;
 import com.petros.bring.annotations.Lazy;
 import com.petros.bring.annotations.Primary;
 import com.petros.bring.exception.BeanDefinitionStoreException;
-import com.petros.bring.exception.MoreThanOneConstructorException;
+import com.petros.bring.exception.ClassConctructorException;
 import com.petros.bring.reader.BeanDefinition;
 import com.petros.bring.reader.BeanDefinitionReader;
 import com.petros.bring.reader.BeanDefinitionRegistry;
@@ -66,7 +66,9 @@ public class AnnotatedBeanDefinitionReader implements BeanDefinitionReader {
         var constructors = aClass.getDeclaredConstructors();
         var constrCount = constructors.length;
         if (constrCount > 1) {
-            throw new MoreThanOneConstructorException("More than one constructor");
+            throw new ClassConctructorException("Class have more than one constructor");
+        } else if (constrCount==0) {
+            throw new ClassConctructorException("Class have not public constructor");
         }
         var constructorParamsList = Arrays.stream(Arrays.stream(constructors)
                         .map(Constructor::getParameterTypes)

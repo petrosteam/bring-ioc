@@ -6,9 +6,16 @@ import com.petros.bring.reader.impl.AnnotatedBeanDefinitionReader;
 import com.petros.bring.reader.impl.BeanDefinitionImpl;
 import com.petros.bring.reader.impl.BeanDefinitionRegistryImpl;
 import com.petros.bring.reader.impl.JavaBeanDefinitionReader;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -88,6 +95,23 @@ class AnnotatedBeanDefinitionReaderTest {
                         .withName("newComer")
                         .createBeanDefinitionImpl());
         assertThat(beanDefinitionRegistry.getBeanDefinition("newComer").getName()).isEqualTo("newComer");
+    }
+    @Test
+    @Order(10)
+    @DisplayName("Check add constructor value to depends on")
+    void checkAddOneConstructorToDependsOnThanSuccess(){
+        var testUserNoDefaultConstructor =
+                annotatedBeanDefinitionReader.getBeanDefinitionRegistry().getBeanDefinition("testUserNoDefaultConstructor");
+        assertNotNull(testUserNoDefaultConstructor.getDependsOn());
+    }
+
+    @Test
+    @Order(11)
+    @DisplayName("Check add constructor value to depends on")
+    void checkAddOneConstructorToDependsOnThanError(){
+        var testUserNoDefaultConstructor =
+                annotatedBeanDefinitionReader.getBeanDefinitionRegistry().getBeanDefinition("testIdClass");
+        assertNull(testUserNoDefaultConstructor.getDependsOn());
     }
 
 }
