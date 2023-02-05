@@ -22,4 +22,11 @@ public class AnnotationConfigApplicationContext extends AnnotationBeanFactory {
 //                .collect(Collectors.toSet());
         rootContextMap.values().forEach(bean -> postProcessBean(getClassByName(bean.getClass().getName()), bean));
     }
+
+    private boolean needsRegistration(BeanDefinition beanDefinition) {
+        if (Scope.PROTOTYPE.equals(beanDefinition.getScope())) {
+            return false;
+        }
+        return rootContextMap.get(beanDefinition.getName()) == null;
+    }
 }

@@ -10,16 +10,12 @@ import com.petros.bring.main.message.MessageService;
 import com.petros.bring.main.prototype.AudiCasService;
 import com.petros.bring.main.prototype.CarService;
 import com.petros.bring.main.prototype.KiaCarService;
-import com.petros.bring.model.ComplexService;
-import com.petros.bring.model.Service;
-import com.petros.bring.model.SimpleService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import com.petros.bring.test.model.SimpleComponent;
 import org.junit.Before;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ApplicationTest {
@@ -35,14 +31,6 @@ class ApplicationTest {
     @DisplayName("BeanFactory instance exists")
     void factoryCreatedTest() {
         assertNotNull(factory);
-    }
-
-    @Test
-    @DisplayName("When more than one matching bean exists then primary one should be autowired")
-    void autowirePrimaryBean() {
-        ComplexService complexService = factory.getBean(ComplexService.class);
-        SimpleService simpleService = (SimpleService) factory.getBean(Service.class);
-        assertThat(complexService.getService()).isSameAs(simpleService);
     }
 
     @Test

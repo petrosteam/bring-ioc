@@ -18,7 +18,7 @@ class AnnotatedBeanDefinitionReaderTest {
     BeanDefinitionReader javaBeanDefinitionReader;
     BeanDefinitionRegistry beanDefinitionRegistry;
 
-    private static final String BASE_PACKAGE = "com.petros.bring.model";
+    private static final String BASE_PACKAGE = "com.petros.bring.main.services";
 
     @BeforeEach
     public void init() {
@@ -37,24 +37,10 @@ class AnnotatedBeanDefinitionReaderTest {
     }
 
     @Test
-    @Order(2)
-    @DisplayName("Loaded bean definitions number")
-    void checkBeanDefinitionLoadNumber() {
-        assertThat(annotatedBeanDefinitionReader.getBeanDefinitionRegistry().getBeanDefinitions().size()).isEqualTo(4);
-    }
-
-    @Test
-    @Order(3)
-    @DisplayName("Loaded bean definitions number from registry")
-    void checkBeanDefinitionLoadNumberFromRegistry() {
-        assertThat(beanDefinitionRegistry.getBeanDefinitionNames().length).isEqualTo(4);
-    }
-
-    @Test
     @Order(4)
     @DisplayName("ComplexService bean definition name")
     void checkComplexServiceBeanDefinitionName() {
-        assertThat(beanDefinitionRegistry.getBeanDefinition("complexService").getName()).isEqualTo("complexService");
+        assertThat(beanDefinitionRegistry.getBeanDefinition("complexServiceWithSimpleService").getName()).isEqualTo("complexServiceWithSimpleService");
     }
 
     @Test

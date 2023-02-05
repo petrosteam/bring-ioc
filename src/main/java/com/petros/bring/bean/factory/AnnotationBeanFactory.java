@@ -12,7 +12,9 @@ import com.petros.bring.reader.Scope;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -36,7 +38,7 @@ public class AnnotationBeanFactory implements BeanFactory {
         return getOptionalBean(beanType)
                 .or(() -> this.getPrototypeBeanByType(beanType))
                 .orElseThrow(() -> new NoSuchBeanException("Bean with type %s not found".formatted(beanType.getName()))
-        );
+                );
     }
 
     public <T> Optional<T> getPrototypeBeanByType(Class<T> beanType) {
@@ -129,6 +131,17 @@ public class AnnotationBeanFactory implements BeanFactory {
         } catch (InvocationTargetException | InstantiationException | IllegalAccessException |
                  NoSuchMethodException e) {
             throw new BeanCreationException(beanDefinition, e);
+    private void ensureBeanDefinitionsCreated(Set<BeanDefinition> beanDefinitions) {
+        beanDefinitions.forEach(bd -> {
+            try {
+                getBean(Class.forName(bd.getBeanClassName()));
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(String.format("Not able to find class %s", bd.getBeanClassName()), e);
+            }
+        });
+    }
+
+    private <T> T createBean(Class<T> beanType) {
         }
     }
 

@@ -1,8 +1,7 @@
-package com.petros.bring.model;
+package com.petros.bring.main.services.autowired.fields;
 
 import com.petros.bring.annotations.Component;
 import com.petros.bring.annotations.Configuration;
-import com.petros.bring.reader.Scope;
 
 @Configuration
 public class ConfigurationBringMeToLife {
@@ -11,8 +10,8 @@ public class ConfigurationBringMeToLife {
         return new ConfigComplexService();
     }
 
-    @Component(name = "koobik", scope = Scope.PROTOTYPE)
+    @Component(name = "koobik")
     private ConfigSimpleService getSimpleService() {
-        return null;
+        return new ConfigSimpleService();
     }
 }
