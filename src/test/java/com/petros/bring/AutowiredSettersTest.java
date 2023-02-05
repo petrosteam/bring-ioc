@@ -1,6 +1,8 @@
 package com.petros.bring;
 
 import com.petros.bring.bean.factory.BeanFactory;
+import com.petros.bring.main.services.autowired.fields.SimplePrimaryService;
+import com.petros.bring.main.services.autowired.methods.ComplexServiceWithSetterAndServiceInterface;
 import com.petros.bring.main.services.autowired.methods.ComplexServiceWithSetterAndSimpleService;
 import com.petros.bring.main.services.autowired.methods.SimpleServiceWithSetter;
 import org.junit.jupiter.api.BeforeAll;
@@ -40,5 +42,12 @@ public class AutowiredSettersTest {
         assertEquals(complexServiceWithSimpleService.getService(), simpleService);
     }
 
+    @Test
+    @DisplayName("check complex service with setter autowired by interface")
+    void getComplesServiceWithFieldAutowiredByInterface() {
+        ComplexServiceWithSetterAndServiceInterface complexServiceWithSetterAndServiceInterface = factory.getBean(ComplexServiceWithSetterAndServiceInterface.class);
+        SimplePrimaryService simpleService = factory.getBean(SimplePrimaryService.class);
+        assertEquals(complexServiceWithSetterAndServiceInterface.getService(), simpleService);
+    }
 
 }
