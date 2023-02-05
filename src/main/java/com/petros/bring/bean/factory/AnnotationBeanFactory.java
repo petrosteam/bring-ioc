@@ -29,7 +29,7 @@ public class AnnotationBeanFactory implements BeanFactory {
     @Override
     public <T> T getBean(Class<T> beanType) throws NoSuchBeanException, NoUniqueBeanException {
         Set<BeanDefinition> beanDefinitions = registry.getBeanDefinitionByType(beanType);
-        if (beanDefinitions.size() > 1) {
+        if (beanDefinitions.size() > 1 ) {
             ensureBeanDefinitionsCreated(beanDefinitions);
         }
         Map<String, T> matchingBeans = getAllBeans(beanType);
@@ -93,8 +93,7 @@ public class AnnotationBeanFactory implements BeanFactory {
                 return beanType.getConstructor().newInstance();
             }
             return obj;
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
-                 NoSuchMethodException e) {
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
     }

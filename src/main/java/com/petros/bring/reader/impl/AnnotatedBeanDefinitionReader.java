@@ -66,9 +66,9 @@ public class AnnotatedBeanDefinitionReader implements BeanDefinitionReader {
         var constructors = aClass.getDeclaredConstructors();
         var constrCount = constructors.length;
         if (constrCount > 1) {
-            throw new ClassConctructorException("Class have more than one constructor");
-        } else if (constrCount==0) {
-            throw new ClassConctructorException("Class have not public constructor");
+            throw new ClassConctructorException(aClass.getName() + " Class have more than one constructor");
+        } else if (constrCount == 0) {
+            throw new ClassConctructorException(aClass.getName() + " Class have not public constructor");
         }
         var constructorParamsList = Arrays.stream(Arrays.stream(constructors)
                         .map(Constructor::getParameterTypes)
