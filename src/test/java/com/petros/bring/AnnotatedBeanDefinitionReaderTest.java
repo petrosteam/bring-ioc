@@ -40,7 +40,7 @@ class AnnotatedBeanDefinitionReaderTest {
     @Order(2)
     @DisplayName("Loaded bean definitions number")
     void checkBeanDefinitionLoadNumber() {
-        assertThat(annotatedBeanDefinitionReader.loadBeanDefinitions(BASE_PACKAGE)).isEqualTo(4);
+        assertThat(annotatedBeanDefinitionReader.getBeanDefinitionRegistry().getBeanDefinitions().size()).isEqualTo(4);
     }
 
     @Test

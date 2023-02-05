@@ -1,7 +1,6 @@
 package com.petros.bring;
 
 import com.petros.bring.bean.factory.BeanFactory;
-import com.petros.bring.test.model.ComplexService;
 import com.petros.bring.exception.NoUniqueBeanException;
 import com.petros.bring.main.image.ImageService;
 import com.petros.bring.main.image.MarsImageService;
@@ -24,7 +23,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ApplicationTest {
-    private static final String BASE_PACKAGE = "com.petros.bring.test.model";
+    private static final String BASE_PACKAGE = "com.petros.bring";
     private static BeanFactory factory;
 
     @BeforeAll

@@ -19,7 +19,6 @@ public class Application {
 
     private static final String[] INTERNAL_PACKAGES = new String[]{
             "com.petros.bring.reader",
-//            "com.petros.bring.bean",
             "com.petros.bring.context",
             "com.petros.bring.postprocessor"
     };

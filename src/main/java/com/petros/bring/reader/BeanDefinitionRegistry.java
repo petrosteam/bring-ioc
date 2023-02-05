@@ -1,6 +1,7 @@
 package com.petros.bring.reader;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 
 public interface BeanDefinitionRegistry {
@@ -15,9 +16,11 @@ public interface BeanDefinitionRegistry {
 
     Class<?> getBeanTypeByName(String name);
 
-    Set<BeanDefinition> getBeanDefinitionByType(Class<?> beanType);
+    Set<BeanDefinition> getBeanDefinitionsByType(Class<?> beanType);
 
     String[] getBeanDefinitionNames();
 
     Collection<BeanDefinition> getBeanDefinitions();
+
+    <T> Optional<BeanDefinition> getPrimaryBeanDefinition(Class<T> beanType);
 }
