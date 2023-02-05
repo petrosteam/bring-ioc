@@ -3,6 +3,7 @@ package com.petros.bring.bean.factory;
 import com.petros.bring.exception.NoSuchBeanException;
 import com.petros.bring.exception.NoUniqueBeanException;
 import com.petros.bring.postprocessor.BeanPostProcessor;
+import com.petros.bring.postprocessor.OrderedBeanDefinitionPostProcessor;
 import com.petros.bring.reader.BeanDefinition;
 import com.petros.bring.reader.BeanDefinitionRegistry;
 import com.petros.bring.reader.Scope;
@@ -10,6 +11,7 @@ import com.petros.bring.reader.Scope;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -17,10 +19,10 @@ import java.util.stream.Collectors;
 public class AnnotationBeanFactory implements BeanFactory {
 
     protected final BeanDefinitionRegistry registry;
-    private final List<BeanPostProcessor> beanPostProcessors;
+    private final Queue<OrderedBeanDefinitionPostProcessor> beanPostProcessors;
     protected static final Map<String, Object> rootContextMap = new ConcurrentHashMap<>();
 
-    public AnnotationBeanFactory(BeanDefinitionRegistry registry, List<BeanPostProcessor> beanPostProcessors) {
+    public AnnotationBeanFactory(BeanDefinitionRegistry registry, Queue<OrderedBeanDefinitionPostProcessor> beanPostProcessors) {
         this.registry = registry;
         this.beanPostProcessors = beanPostProcessors;
     }
@@ -76,7 +78,7 @@ public class AnnotationBeanFactory implements BeanFactory {
             rootContextMap.put(beanDefinition.getName(), obj);
             for (BeanPostProcessor postProcessor : beanPostProcessors) {
                 postProcessor.postProcessBeforeInitialization(beanType, obj, this);
-                postProcessor.postProcessAfterInitialization(beanType, obj);
+                obj = (T) postProcessor.postProcessAfterInitialization(beanType, obj, this);
             }
             if (beanDefinition.getScope().equals(Scope.PROTOTYPE)) {
                 return beanType.getConstructor().newInstance();
@@ -122,5 +124,10 @@ public class AnnotationBeanFactory implements BeanFactory {
         return rootContextMap.entrySet().stream()
                 .filter(entry -> beanType.isAssignableFrom(entry.getValue().getClass()))
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> beanType.cast(entry.getValue())));
+    }
+
+    @Override
+    public void registerBean(String name, Object bean) {
+        rootContextMap.put(name, bean);
     }
 }

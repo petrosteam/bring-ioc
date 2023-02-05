@@ -8,7 +8,7 @@ public interface BeanPostProcessor {
         return bean;
     }
 
-    default Object postProcessAfterInitialization(Class<?> beanClass, Object bean) {
+    default Object postProcessAfterInitialization(Class<?> beanClass, Object bean, BeanFactory factory) {
         return bean;
     }
 

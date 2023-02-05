@@ -12,16 +12,18 @@ public class BeanDefinitionImpl implements BeanDefinition {
     private Scope scope;
     private boolean isLazy;
     private boolean isPrimary;
+    private boolean isConfiguration;
     private String[] dependsOn;
 
 
-    public BeanDefinitionImpl(String name, String beanClassName, Scope scope, boolean isLazy, boolean isPrimary, String[] dependsOn) {
+    public BeanDefinitionImpl(String name, String beanClassName, Scope scope, boolean isLazy, boolean isPrimary, String[] dependsOn, boolean isConfiguration) {
         this.name = name;
         this.beanClassName = beanClassName;
         this.scope = scope;
         this.isLazy = isLazy;
         this.isPrimary = isPrimary;
         this.dependsOn = dependsOn;
+        this.isConfiguration = isConfiguration;
     }
 
     public void setName(String name) {
@@ -74,6 +76,11 @@ public class BeanDefinitionImpl implements BeanDefinition {
     }
 
     @Override
+    public boolean isConfiguration() {
+        return isConfiguration;
+    }
+
+    @Override
     public String[] getDependsOn() {
         return dependsOn;
     }
@@ -110,6 +117,7 @@ public class BeanDefinitionImpl implements BeanDefinition {
         private Scope scope;
         private boolean isLazy;
         private boolean isPrimary;
+        private boolean isConfiguration;
         private String[] dependsOn;
 
         public static BeanDefinitionBuilder newInstance() {
@@ -146,8 +154,13 @@ public class BeanDefinitionImpl implements BeanDefinition {
             return this;
         }
 
+        public BeanDefinitionBuilder withIsConfiguration(boolean isConfiguration) {
+            this.isConfiguration = isConfiguration;
+            return this;
+        }
+
         public BeanDefinitionImpl createBeanDefinitionImpl() {
-            return new BeanDefinitionImpl(name, beanClassName, scope, isLazy, isPrimary, dependsOn);
+            return new BeanDefinitionImpl(name, beanClassName, scope, isLazy, isPrimary, dependsOn, isConfiguration);
         }
     }
 

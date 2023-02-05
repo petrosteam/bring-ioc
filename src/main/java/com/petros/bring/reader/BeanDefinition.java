@@ -12,5 +12,7 @@ public interface BeanDefinition {
 
     boolean isPrimary();
 
+    boolean isConfiguration();
+
     String[] getDependsOn();
 }

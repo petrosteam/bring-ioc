@@ -1,17 +1,16 @@
 package com.petros.bring;
 
+import com.petros.bring.annotations.Order;
 import com.petros.bring.bean.factory.BeanFactory;
 import com.petros.bring.context.AnnotationConfigApplicationContext;
-import com.petros.bring.postprocessor.BeanPostProcessor;
+import com.petros.bring.postprocessor.OrderedBeanDefinitionPostProcessor;
 import com.petros.bring.reader.BeanDefinitionReader;
 import com.petros.bring.reader.BeanDefinitionRegistry;
 import com.petros.bring.reader.impl.BeanDefinitionRegistryImpl;
 import org.reflections.Reflections;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Application {
     private static final String BRING_BASE_PACKAGE = "com.petros.bring";
@@ -23,7 +22,7 @@ public class Application {
         List<BeanDefinitionReader> beanDefinitionReaders = createBeanDefinitionReaders(registry);
         beanDefinitionReaders.forEach(reader -> reader.loadBeanDefinitions(packageName));
 
-        List<BeanPostProcessor> beanPostProcessors = createBeanPostProcessors();
+        Queue<OrderedBeanDefinitionPostProcessor> beanPostProcessors = createBeanPostProcessors();
 
         return new AnnotationConfigApplicationContext(registry, beanPostProcessors);
     }
@@ -48,13 +47,18 @@ public class Application {
         return result;
     }
 
-    private static List<BeanPostProcessor> createBeanPostProcessors() {
-        List<BeanPostProcessor> result = new ArrayList<>();
-        Set<Class<? extends BeanPostProcessor>> subTypesOfBeanPostProcessor =
-                innerReflections.getSubTypesOf(BeanPostProcessor.class);
-        subTypesOfBeanPostProcessor.forEach(subTypes -> {
+    private static Queue<OrderedBeanDefinitionPostProcessor> createBeanPostProcessors() {
+        Queue<OrderedBeanDefinitionPostProcessor> result =
+                new PriorityQueue<>(Comparator.comparing(OrderedBeanDefinitionPostProcessor::getOrder));
+
+        Set<Class<? extends OrderedBeanDefinitionPostProcessor>> subTypesOfBeanPostProcessor =
+                innerReflections.getSubTypesOf(OrderedBeanDefinitionPostProcessor.class);
+        subTypesOfBeanPostProcessor.forEach(subType -> {
             try {
-                result.add(subTypes.getConstructor().newInstance());
+                int order = subType.isAnnotationPresent(Order.class)
+                        ? subType.getAnnotation(Order.class).value()
+                        : 99;
+                result.add(subType.getDeclaredConstructor(int.class).newInstance(order));
             } catch (InstantiationException e) {
                 throw new RuntimeException(e);
             } catch (IllegalAccessException e) {

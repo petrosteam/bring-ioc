@@ -1,6 +1,7 @@
 package com.petros.bring.postprocessor;
 
 import com.petros.bring.annotations.Autowired;
+import com.petros.bring.annotations.Order;
 import com.petros.bring.bean.factory.BeanFactory;
 
 import java.lang.reflect.Field;
@@ -9,7 +10,13 @@ import java.util.Arrays;
 /**
  * The type Autowire bean post processor. Wires bean fields marked with @Autowire annotation.
  */
-public class AutowireFieldsBeanPostProcessor implements BeanPostProcessor{
+@Order
+public class AutowireFieldsBeanPostProcessor extends OrderedBeanDefinitionPostProcessor {
+
+    public AutowireFieldsBeanPostProcessor(int order) {
+        super(order);
+    }
+
     /**
      * PostProcessor which sets field up by Autowire annotation
      * @param beanType a class of a bean

@@ -1,6 +1,7 @@
 package com.petros.bring.postprocessor;
 
 import com.petros.bring.annotations.Autowired;
+import com.petros.bring.annotations.Order;
 import com.petros.bring.bean.factory.BeanFactory;
 
 import java.lang.reflect.InvocationTargetException;
@@ -11,7 +12,12 @@ import java.util.Arrays;
 /**
  * The type Autowire methods bean post processor. Wires bean method parameters marked with autowire.
  */
-public class AutowireMethodsBeanPostProcessor implements BeanPostProcessor {
+@Order
+public class AutowireMethodsBeanPostProcessor extends OrderedBeanDefinitionPostProcessor {
+
+    public AutowireMethodsBeanPostProcessor(int order) {
+        super(order);
+    }
 
     /**
      * Wires bean method parameters marked with autowire.

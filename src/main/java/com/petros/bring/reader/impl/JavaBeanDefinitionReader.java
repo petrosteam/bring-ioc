@@ -16,7 +16,6 @@ import org.reflections.Reflections;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class JavaBeanDefinitionReader implements BeanDefinitionReader {
 
@@ -29,7 +28,7 @@ public class JavaBeanDefinitionReader implements BeanDefinitionReader {
 
 
     /**
-     * @param location defines lroot package for scan
+     * @param location defines root package for scan
      * @return number of bean definitions been loaded
      * @throws BeanDefinitionStoreException once any exception (doubtful)
      */
