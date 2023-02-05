@@ -1,9 +1,6 @@
 package com.petros.bring.reader.impl;
 
-import com.petros.bring.annotations.Component;
-import com.petros.bring.annotations.Configuration;
-import com.petros.bring.annotations.Lazy;
-import com.petros.bring.annotations.Primary;
+import com.petros.bring.annotations.*;
 import com.petros.bring.exception.BeanDefinitionStoreException;
 import com.petros.bring.reader.BeanDefinition;
 import com.petros.bring.reader.BeanDefinitionReader;
@@ -44,9 +41,13 @@ public class JavaBeanDefinitionReader implements BeanDefinitionReader {
         Set<Class<?>> annotatedClasses = reflections.getTypesAnnotatedWith(Configuration.class);
         return annotatedClasses.stream()
                 .flatMap(aClass -> Arrays.stream(aClass.getDeclaredMethods()))
-                .filter(method -> method.isAnnotationPresent(Component.class))
+                .filter(this::isBeanOrComponent)
                 .map(this::createBeanDefinition)
                 .collect(Collectors.toSet());
+    }
+
+    private boolean isBeanOrComponent(Method method) {
+        return  method.isAnnotationPresent(Bean.class) || method.isAnnotationPresent(Component.class);
     }
 
     private BeanDefinition createBeanDefinition(Method method) {
