@@ -7,9 +7,9 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 
 /**
- * The type Autowire bean post processor.
+ * The type Autowire bean post processor. Wires bean fields marked with @Autowire annotation.
  */
-public class AutowireBeanPostProcessor implements BeanPostProcessor{
+public class AutowireFieldsBeanPostProcessor implements BeanPostProcessor{
     /**
      * PostProcessor which sets field up by Autowire annotation
      * @param beanType a class of a bean

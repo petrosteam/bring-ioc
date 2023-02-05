@@ -1,7 +1,6 @@
 package com.petros.bring.context;
 
 import com.petros.bring.bean.factory.AnnotationBeanFactory;
-import com.petros.bring.exception.BeanDefinitionOverrideException;
 import com.petros.bring.postprocessor.BeanPostProcessor;
 import com.petros.bring.reader.BeanDefinition;
 import com.petros.bring.reader.BeanDefinitionRegistry;
@@ -20,20 +19,15 @@ public class AnnotationConfigApplicationContext extends AnnotationBeanFactory {
     }
 
     private void registerBean(BeanDefinition beanDefinition) {
-        validate(beanDefinition);
-        getBean(registry.getBeanTypeByName(beanDefinition.getName()));
+        if (needsRegistration(beanDefinition)) {
+            getBean(registry.getBeanTypeByName(beanDefinition.getName()));
+        }
     }
 
-    private static void validate(BeanDefinition beanDefinition) {
+    private boolean needsRegistration(BeanDefinition beanDefinition) {
         if (Scope.PROTOTYPE.equals(beanDefinition.getScope())) {
-            return;
+            return false;
         }
-        var existingBean = rootContextMap.get(beanDefinition.getName());
-        if (existingBean != null) {
-            throw new BeanDefinitionOverrideException(String.format(
-                    "Cannot register bean definition [%s] for bean '%s': There is already [%s] bound.",
-                    beanDefinition, beanDefinition.getName(), existingBean
-            ));
-        }
+        return rootContextMap.get(beanDefinition.getName()) == null;
     }
 }

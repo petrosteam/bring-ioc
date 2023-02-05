@@ -54,7 +54,7 @@ public class BeanDefinitionRegistryImpl implements BeanDefinitionRegistry {
     @Override
     public Set<BeanDefinition> getBeanDefinitionByType(Class<?> beanType) {
         return beanDefinitionsByType.entrySet().stream()
-                .filter(entry -> entry.getKey().isAssignableFrom(beanType))
+                .filter(entry -> beanType.isAssignableFrom(entry.getKey()))
                 .map(Map.Entry::getValue)
                 .collect(Collectors.toSet());
     }
