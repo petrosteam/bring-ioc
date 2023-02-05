@@ -2,7 +2,9 @@ package com.petros.bring.context;
 
 import com.petros.bring.annotations.Component;
 import com.petros.bring.bean.factory.AnnotationBeanFactory;
+import com.petros.bring.reader.BeanDefinition;
 import com.petros.bring.reader.BeanDefinitionRegistry;
+import com.petros.bring.reader.Scope;
 
 import static com.petros.bring.Utils.getClassByName;
 
@@ -16,10 +18,6 @@ public class AnnotationConfigApplicationContext extends AnnotationBeanFactory {
 
     public void register(BeanDefinitionRegistry registry) {
         registry.getBeanDefinitions().forEach(this::create);
-//        var beans = Arrays.stream(registry.getBeanDefinitionNames())
-//                .map(registry::getBeanDefinition)
-//                .map(this::create)
-//                .collect(Collectors.toSet());
         rootContextMap.values().forEach(bean -> postProcessBean(getClassByName(bean.getClass().getName()), bean));
     }
 

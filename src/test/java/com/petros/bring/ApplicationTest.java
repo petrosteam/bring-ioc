@@ -10,10 +10,9 @@ import com.petros.bring.main.message.MessageService;
 import com.petros.bring.main.prototype.AudiCasService;
 import com.petros.bring.main.prototype.CarService;
 import com.petros.bring.main.prototype.KiaCarService;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
-import com.petros.bring.test.model.SimpleComponent;
-import org.junit.Before;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,6 +24,7 @@ class ApplicationTest {
     @BeforeAll
     public static void init() {
         factory = Application.run(BASE_PACKAGE);
+        BeanFactory factory2 = Application.run(BASE_PACKAGE);
     }
 
     @Test
@@ -93,5 +93,10 @@ class ApplicationTest {
         CarService kiaCarService1 = factory.getBean(KiaCarService.class);
         CarService kiaCarService2 = factory.getBean(KiaCarService.class);
         assertEquals(kiaCarService1, kiaCarService2);
+    }
+
+    @AfterAll
+    public static void teardown() {
+        factory = null;
     }
 }

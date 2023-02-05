@@ -12,9 +12,7 @@ import com.petros.bring.reader.Scope;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -131,6 +129,9 @@ public class AnnotationBeanFactory implements BeanFactory {
         } catch (InvocationTargetException | InstantiationException | IllegalAccessException |
                  NoSuchMethodException e) {
             throw new BeanCreationException(beanDefinition, e);
+        }
+    }
+
     private void ensureBeanDefinitionsCreated(Set<BeanDefinition> beanDefinitions) {
         beanDefinitions.forEach(bd -> {
             try {
@@ -141,9 +142,6 @@ public class AnnotationBeanFactory implements BeanFactory {
         });
     }
 
-    private <T> T createBean(Class<T> beanType) {
-        }
-    }
 
     @Override
     public <T> T getBean(String name, Class<T> beanType) throws NoSuchBeanException, NoUniqueBeanException {

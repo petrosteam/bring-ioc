@@ -15,8 +15,6 @@ import java.util.List;
 import java.util.Set;
 
 public class Application {
-    private static final String BRING_BASE_PACKAGE = "com.petros.bring";
-
     private static final String[] INTERNAL_PACKAGES = new String[]{
             "com.petros.bring.reader",
             "com.petros.bring.context",
