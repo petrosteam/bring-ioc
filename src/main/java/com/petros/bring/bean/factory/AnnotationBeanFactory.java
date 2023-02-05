@@ -79,7 +79,7 @@ public class AnnotationBeanFactory implements BeanFactory {
                 postProcessor.postProcessAfterInitialization(beanType, obj);
             }
             if (beanDefinition.getScope().equals(Scope.PROTOTYPE)) {
-                return obj;
+                return beanType.getConstructor().newInstance();
             }
             return obj;
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
