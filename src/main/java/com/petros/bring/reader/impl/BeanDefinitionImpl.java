@@ -12,10 +12,10 @@ public class BeanDefinitionImpl implements BeanDefinition {
     private Scope scope;
     private boolean isLazy;
     private boolean isPrimary;
-    private String[] dependsOn;
+    private Class<?>[] dependsOn;
 
 
-    public BeanDefinitionImpl(String name, String beanClassName, Scope scope, boolean isLazy, boolean isPrimary, String[] dependsOn) {
+    public BeanDefinitionImpl(String name, String beanClassName, Scope scope, boolean isLazy, boolean isPrimary, Class<?>[] dependsOn) {
         this.name = name;
         this.beanClassName = beanClassName;
         this.scope = scope;
@@ -44,7 +44,7 @@ public class BeanDefinitionImpl implements BeanDefinition {
         isPrimary = primary;
     }
 
-    public void setDependsOn(String[] dependsOn) {
+    public void setDependsOn(Class<?>[] dependsOn) {
         this.dependsOn = dependsOn;
     }
 
@@ -74,7 +74,7 @@ public class BeanDefinitionImpl implements BeanDefinition {
     }
 
     @Override
-    public String[] getDependsOn() {
+    public Class<?>[] getDependsOn() {
         return dependsOn;
     }
 
@@ -110,7 +110,7 @@ public class BeanDefinitionImpl implements BeanDefinition {
         private Scope scope;
         private boolean isLazy;
         private boolean isPrimary;
-        private String[] dependsOn;
+        private Class<?>[] dependsOn;
 
         public static BeanDefinitionBuilder newInstance() {
             return new BeanDefinitionBuilder();
@@ -141,7 +141,7 @@ public class BeanDefinitionImpl implements BeanDefinition {
             return this;
         }
 
-        public BeanDefinitionBuilder withDependsOn(String[] dependsOn) {
+        public BeanDefinitionBuilder withDependsOn(Class<?>[] dependsOn) {
             this.dependsOn = dependsOn;
             return this;
         }

@@ -4,6 +4,7 @@ import com.petros.bring.annotations.Component;
 import com.petros.bring.annotations.Lazy;
 import com.petros.bring.annotations.Primary;
 import com.petros.bring.exception.BeanDefinitionStoreException;
+import com.petros.bring.exception.MoreThanOneConstructorException;
 import com.petros.bring.reader.BeanDefinition;
 import com.petros.bring.reader.BeanDefinitionReader;
 import com.petros.bring.reader.BeanDefinitionRegistry;
@@ -12,12 +13,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.reflections.Reflections;
 
+import java.lang.reflect.Constructor;
+import java.util.Arrays;
 import java.util.Set;
-import java.util.stream.Collectors;
-
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.mapping;
-import static java.util.stream.Collectors.toMap;
 
 
 /**
@@ -60,7 +58,26 @@ public class AnnotatedBeanDefinitionReader implements BeanDefinitionReader {
                 .withScope(getBeanScope(aClass))
                 .withIsLazy(isLazy(aClass))
                 .withIsPrimary(isPrimary(aClass))
+                .withDependsOn(getDependsOn(aClass))
                 .createBeanDefinitionImpl();
+    }
+
+    private Class<?>[] getDependsOn(Class<?> aClass) {
+        var constructors = aClass.getDeclaredConstructors();
+        var constrCount = constructors.length;
+        if (constrCount > 1) {
+            throw new MoreThanOneConstructorException("More than one constructor");
+        }
+        var constructorParamsList = Arrays.stream(Arrays.stream(constructors)
+                        .map(Constructor::getParameterTypes)
+                        .findAny()
+                        .orElseThrow())
+                .toList();
+        if (constructorParamsList.size() == 0) {
+            return null;
+        }
+        var classesArray = new Class<?>[constructorParamsList.size()];
+        return constructorParamsList.toArray(classesArray);
     }
 
     private boolean isPrimary(Class<?> aClass) {

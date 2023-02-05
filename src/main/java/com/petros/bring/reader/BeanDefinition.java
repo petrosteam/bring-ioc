@@ -12,5 +12,5 @@ public interface BeanDefinition {
 
     boolean isPrimary();
 
-    String[] getDependsOn();
+    Class<?>[] getDependsOn();
 }
