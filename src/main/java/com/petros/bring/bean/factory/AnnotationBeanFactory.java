@@ -8,6 +8,7 @@ import com.petros.bring.reader.BeanDefinitionRegistry;
 import com.petros.bring.reader.Scope;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,7 +29,7 @@ public class AnnotationBeanFactory implements BeanFactory {
     @Override
     public <T> T getBean(Class<T> beanType) throws NoSuchBeanException, NoUniqueBeanException {
         Set<BeanDefinition> beanDefinitions = registry.getBeanDefinitionByType(beanType);
-        if (beanDefinitions.size() > 1 ) {
+        if (beanDefinitions.size() > 1) {
             ensureBeanDefinitionsCreated(beanDefinitions);
         }
         Map<String, T> matchingBeans = getAllBeans(beanType);
@@ -70,6 +71,16 @@ public class AnnotationBeanFactory implements BeanFactory {
 //                }
                 // check for circular dependencies
 //                obj = aClass.getConstructor().newInstance() with non default constructor
+
+                var dependency = beanDefinition.getDependsOn();
+                var dependencyClass = Arrays.stream(dependency)
+                        .findAny()
+                        .orElseThrow()
+                        .getConstructor()
+                        .newInstance();
+
+                obj = beanType.getConstructor(dependency).newInstance(dependencyClass);
+
             } else {
                 obj = beanType.getConstructor().newInstance();
             }
@@ -82,7 +93,8 @@ public class AnnotationBeanFactory implements BeanFactory {
                 return beanType.getConstructor().newInstance();
             }
             return obj;
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                 NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
     }
