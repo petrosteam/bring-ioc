@@ -25,11 +25,10 @@ public class Application {
     public static BeanFactory run(String packageName) {
         var context = initFactory();
         var factory = context.getBean(AnnotationConfigApplicationContext.class);
-        var registry = factory.getBean(BeanDefinitionRegistry.class);
-        var readers = factory.getAllBeans(BeanDefinitionReader.class);
+        var readers = context.getAllBeans(BeanDefinitionReader.class);
         readers.values().forEach(reader -> reader.loadBeanDefinitions(packageName));
-        factory.getBean(AnnotationConfigApplicationContext.class).register(registry);
-        return factory.getBean(AnnotationConfigApplicationContext.class);
+        factory.register();
+        return context.getBean(BeanFactory.class);
     }
 
     private static AnnotationConfigApplicationContext initFactory() {

@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class AutowiredFieldsTest {
 
-    private static final String BASE_PACKAGE = "com.petros.bring";
+    private static final String BASE_PACKAGE = "com.petros.bring.main";
     private static BeanFactory factory;
 
     @BeforeAll

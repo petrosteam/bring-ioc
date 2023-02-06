@@ -1,7 +1,5 @@
 package com.petros.bring.postprocessor;
 
-import com.petros.bring.bean.factory.BeanFactory;
-
 public interface BeanPostProcessor {
 
     default Object postProcessBeforeInitialization(Class<?> beanClass, Object bean) {

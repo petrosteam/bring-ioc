@@ -31,7 +31,7 @@ public class AutowiredAnnotationBeanPostProcessor implements BeanPostProcessor {
             try {
                 field.set(bean, beanToInject);
             } catch (IllegalAccessException e) {
-                throw new RuntimeException("Can not inject " + e);
+                throw new RuntimeException("Can not inject: %s to %s".formatted(beanToInject, bean));
             }
         }
         return bean;

@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  * The type Bean definition registry.
  * holds a map of names - BeanDefinitions
  */
-@Component
+@Component(name = "registry")
 public class BeanDefinitionRegistryImpl implements BeanDefinitionRegistry {
     private final Map<String, BeanDefinition> beanDefinitionMap;
     private final Map<Class<?>, BeanDefinition> beanDefinitionsByType;

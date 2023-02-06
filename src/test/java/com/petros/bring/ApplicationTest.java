@@ -18,13 +18,12 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ApplicationTest {
-    private static final String BASE_PACKAGE = "com.petros.bring";
+    private static final String BASE_PACKAGE = "com.petros.bring.main";
     private static BeanFactory factory;
 
     @BeforeAll
     public static void init() {
         factory = Application.run(BASE_PACKAGE);
-        BeanFactory factory2 = Application.run(BASE_PACKAGE);
     }
 
     @Test
@@ -93,10 +92,5 @@ class ApplicationTest {
         CarService kiaCarService1 = factory.getBean(KiaCarService.class);
         CarService kiaCarService2 = factory.getBean(KiaCarService.class);
         assertEquals(kiaCarService1, kiaCarService2);
-    }
-
-    @AfterAll
-    public static void teardown() {
-        factory = null;
     }
 }

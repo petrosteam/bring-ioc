@@ -24,11 +24,12 @@ import static com.petros.bring.Utils.getClassByName;
 @Slf4j
 public class AnnotationBeanFactory implements BeanFactory {
 
-    protected final BeanDefinitionRegistry registry;
+    protected BeanDefinitionRegistry registry;
     protected static final Map<String, Object> rootContextMap = new ConcurrentHashMap<>();
 
     public AnnotationBeanFactory(BeanDefinitionRegistry registry) {
         this.registry = registry;
+        rootContextMap.clear();
     }
 
     @Override
@@ -92,6 +93,8 @@ public class AnnotationBeanFactory implements BeanFactory {
     private <T> T createBean(BeanDefinition beanDefinition) {
         try {
             var clazz = getClassByName(beanDefinition.getBeanClassName());
+            // We've created beans here (com/petros/bring/context/AnnotationConfigApplicationContext.java:19) but also
+            // call this method recursively that causes creating duplicates
             if (rootContextMap.containsKey(beanDefinition.getName())) {
                 return (T) getBean(beanDefinition.getName(), clazz);
             }
@@ -100,12 +103,6 @@ public class AnnotationBeanFactory implements BeanFactory {
                 var beansByType = new HashMap<>();
                 for (String dependsOnName : beanDefinition.getDependsOn()) {
                     Class<?> bClass = getClassByName(dependsOnName);
-//                    if (!rootContextMap.containsKey(dependsOnName)) {
-//                        var beanDefinitionToCreate = registry.getBeanDefinition(dependsOnName);
-//                        beanToInject = this.create(beanDefinitionToCreate);
-//                    } else {
-//                        beanToInject = rootContextMap.get(dependsOnName);
-//                    }
                     //TODO: Please, refactor me
                     Object beanToInject = null;
                     if (!this.getOptionalBean(bClass).isPresent()) {
@@ -158,10 +155,5 @@ public class AnnotationBeanFactory implements BeanFactory {
         return rootContextMap.entrySet().stream()
                 .filter(entry -> beanType.isAssignableFrom(entry.getValue().getClass()))
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> beanType.cast(entry.getValue())));
-    }
-
-    @Override
-    public Map<String, Object> getRootMap() {
-        return rootContextMap;
     }
 }
