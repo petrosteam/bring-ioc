@@ -101,22 +101,21 @@ public class AnnotationBeanFactory implements BeanFactory {
             T obj = null;
             if (beanDefinition.getDependsOn() != null && beanDefinition.getDependsOn().length != 0) {
                 var beansByType = new HashMap<>();
-                for (String dependsOnName : beanDefinition.getDependsOn()) {
-                    Class<?> bClass = getClassByName(dependsOnName);
+                for (Class<?> dependsOnClass : beanDefinition.getDependsOn()) {
                     //TODO: Please, refactor me
                     Object beanToInject = null;
-                    if (!this.getOptionalBean(bClass).isPresent()) {
+                    if (!this.getOptionalBean(dependsOnClass).isPresent()) {
                         beanToInject =
-                                this.registry.getBeanDefinitionsByType(bClass).stream()
+                                this.registry.getBeanDefinitionsByType(dependsOnClass).stream()
                                         .findFirst()
                                         .map(this::create)
                                         .orElseThrow(
-                                                () -> new BeanCreationException("Could not create bean with type: " + bClass.getName())
+                                                () -> new BeanCreationException("Could not create bean with type: " + dependsOnClass.getName())
                                         );
                     } else {
-                        beanToInject = this.getOptionalBean(bClass).get();
+                        beanToInject = this.getOptionalBean(dependsOnClass).get();
                     }
-                    beansByType.put(bClass, beanToInject);
+                    beansByType.put(dependsOnClass, beanToInject);
                 }
                 return (T) clazz.getConstructor(beansByType.keySet().toArray(new Class<?>[]{}))
                         .newInstance(beansByType.values().toArray());

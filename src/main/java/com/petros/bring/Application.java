@@ -2,6 +2,12 @@ package com.petros.bring;
 
 import com.petros.bring.bean.factory.BeanFactory;
 import com.petros.bring.context.AnnotationConfigApplicationContext;
+import com.petros.bring.environment.ApplicationEnvironment;
+import com.petros.bring.environment.PropertyResolver;
+import com.petros.bring.environment.convert.TypeConversionService;
+import com.petros.bring.environment.convert.TypeConverter;
+import com.petros.bring.exception.ApplicationEnvironmentException;
+import com.petros.bring.exception.RunApplicationContextException;
 import com.petros.bring.reader.BeanDefinitionReader;
 import com.petros.bring.reader.BeanDefinitionRegistry;
 import com.petros.bring.reader.impl.AnnotatedBeanDefinitionReader;
@@ -9,12 +15,12 @@ import com.petros.bring.reader.impl.BeanDefinitionRegistryImpl;
 import org.reflections.Reflections;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Application {
+    private static final String BRING_BASE_PACKAGE = "com.petros.bring";
+    private static final Reflections innerReflections = new Reflections(BRING_BASE_PACKAGE);
+
     private static final String[] INTERNAL_PACKAGES = new String[]{
             "com.petros.bring.reader",
             "com.petros.bring.context",
@@ -32,9 +38,37 @@ public class Application {
     }
 
     private static AnnotationConfigApplicationContext initFactory() {
+        initializeApplicationEnvironment();
+        initializeConvertors();
         var registry = new BeanDefinitionRegistryImpl();
         var reader = new AnnotatedBeanDefinitionReader(registry);
         Arrays.stream(INTERNAL_PACKAGES).forEach(reader::loadBeanDefinitions);
         return new AnnotationConfigApplicationContext(registry);
+    }
+
+    private static void initializeApplicationEnvironment() {
+        Set<PropertyResolver> finalClasses = new HashSet<>();
+        Set<Class<? extends PropertyResolver>> propertyResolvers = innerReflections.getSubTypesOf(PropertyResolver.class);
+        propertyResolvers.forEach(subTypes -> {
+            try {
+                finalClasses.add(subTypes.getConstructor().newInstance());
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                throw new ApplicationEnvironmentException(e.getMessage());
+            }
+        });
+        new ApplicationEnvironment(finalClasses);
+    }
+
+    private static void initializeConvertors() {
+        Set<TypeConverter> finalClasses = new HashSet<>();
+        Set<Class<? extends TypeConverter>> typeConverters = innerReflections.getSubTypesOf(TypeConverter.class);
+        typeConverters.forEach(subTypes -> {
+            try {
+                finalClasses.add(subTypes.getConstructor().newInstance());
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                throw new RunApplicationContextException(e.getMessage());
+            }
+        });
+        new TypeConversionService(finalClasses);
     }
 }

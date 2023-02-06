@@ -2,6 +2,7 @@ package com.petros.bring.postprocessor;
 
 import com.petros.bring.annotations.Value;
 import com.petros.bring.bean.factory.BeanFactory;
+import com.petros.bring.context.AnnotationConfigApplicationContext;
 import com.petros.bring.environment.ApplicationEnvironment;
 import com.petros.bring.environment.PropertyData;
 import com.petros.bring.environment.PropertyResolver;
@@ -16,18 +17,20 @@ import java.util.Arrays;
  */
 public class InjectValueBeanPostProcessor implements BeanPostProcessor {
 
-    /**
-     * @param beanType              - a class of a bean
-     * @param obj                   - an object of a bean
-     * @param annotationBeanFactory - factory to get/create a bean
-     */
+    private final BeanFactory factory;
+
+    public InjectValueBeanPostProcessor(AnnotationConfigApplicationContext beanFactory) {
+        this.factory = beanFactory;
+    }
+
     @Override
-    public <T> void postProcessBeforeInitialization(Class<T> beanType, T obj, BeanFactory annotationBeanFactory) {
+    public Object postProcessBeforeInitialization(Class<?> beanType, Object obj) {
 
         var annotatedFields = Arrays.stream(beanType.getDeclaredFields())
                 .filter(field -> field.isAnnotationPresent(Value.class));
 
         annotatedFields.forEach(field -> injectValue(field, obj));
+        return obj;
     }
 
     /**

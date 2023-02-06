@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ValueFieldInjectionTest {
 
-    private static final String BASE_PACKAGE = "com.petros.bring";
+    private static final String BASE_PACKAGE = "com.petros.bring.main.services";
     private static BeanFactory factory;
 
     @BeforeAll
