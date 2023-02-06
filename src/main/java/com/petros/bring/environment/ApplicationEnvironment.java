@@ -1,5 +1,7 @@
 package com.petros.bring.environment;
 
+import com.petros.bring.annotations.Component;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -15,19 +17,22 @@ import java.util.stream.Collectors;
  * applicationPropertiesMap - a key-value map where Key is a name of property and Value is String representation
  * of property that may be casted to required type with the help of one of {@link PropertyResolver} implementations.
  */
+@Component
 public class ApplicationEnvironment {
 
     public static final String BASE_APPLICATION_PROPERTIES_FILE = "application.properties";
 
     private static Map<String, String> applicationPropertiesMap;
-    private static Set<PropertyResolver> propertyResolvers;
+//    private static Set<PropertyResolver> propertyResolvers;
 
-    public ApplicationEnvironment(Set<PropertyResolver> propertyResolvers) {
-        ApplicationEnvironment.propertyResolvers = propertyResolvers;
+    private final PropertyResolver propertyResolver;
+
+    public ApplicationEnvironment(PropertyResolver propertyResolver) {
+        this.propertyResolver = propertyResolver;
         readApplicationProperties();
     }
 
-    private static void readApplicationProperties() {
+    private void readApplicationProperties() {
         var propertiesFile = ClassLoader.getSystemClassLoader()
                 .getResource(BASE_APPLICATION_PROPERTIES_FILE);
         String path;
@@ -45,11 +50,11 @@ public class ApplicationEnvironment {
         }
     }
 
-    public static String getProperty(String propertyName) {
+    public String getProperty(String propertyName) {
         return applicationPropertiesMap.get(propertyName);
     }
 
-    public static Set<PropertyResolver> getPropertyResolvers() {
-        return propertyResolvers;
+    public PropertyResolver getPropertyResolver() {
+        return propertyResolver;
     }
 }

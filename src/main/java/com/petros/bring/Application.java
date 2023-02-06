@@ -38,37 +38,9 @@ public class Application {
     }
 
     private static AnnotationConfigApplicationContext initFactory() {
-        initializeApplicationEnvironment();
-        initializeConvertors();
         var registry = new BeanDefinitionRegistryImpl();
         var reader = new AnnotatedBeanDefinitionReader(registry);
         Arrays.stream(INTERNAL_PACKAGES).forEach(reader::loadBeanDefinitions);
         return new AnnotationConfigApplicationContext(registry);
-    }
-
-    private static void initializeApplicationEnvironment() {
-        Set<PropertyResolver> finalClasses = new HashSet<>();
-        Set<Class<? extends PropertyResolver>> propertyResolvers = innerReflections.getSubTypesOf(PropertyResolver.class);
-        propertyResolvers.forEach(subTypes -> {
-            try {
-                finalClasses.add(subTypes.getConstructor().newInstance());
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                throw new ApplicationEnvironmentException(e.getMessage());
-            }
-        });
-        new ApplicationEnvironment(finalClasses);
-    }
-
-    private static void initializeConvertors() {
-        Set<TypeConverter> finalClasses = new HashSet<>();
-        Set<Class<? extends TypeConverter>> typeConverters = innerReflections.getSubTypesOf(TypeConverter.class);
-        typeConverters.forEach(subTypes -> {
-            try {
-                finalClasses.add(subTypes.getConstructor().newInstance());
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                throw new RunApplicationContextException(e.getMessage());
-            }
-        });
-        new TypeConversionService(finalClasses);
     }
 }

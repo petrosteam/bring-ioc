@@ -1,5 +1,6 @@
 package com.petros.bring.postprocessor;
 
+import com.petros.bring.annotations.Component;
 import com.petros.bring.annotations.Value;
 import com.petros.bring.bean.factory.BeanFactory;
 import com.petros.bring.context.AnnotationConfigApplicationContext;
@@ -11,16 +12,26 @@ import com.petros.bring.exception.UnsatisfiedPropertyValueException;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * Implementation of PostProcessor needed for injection values to fields annotated with annotation {@link Value}
  */
+@Component
 public class InjectValueBeanPostProcessor implements BeanPostProcessor {
 
     private final BeanFactory factory;
 
-    public InjectValueBeanPostProcessor(AnnotationConfigApplicationContext beanFactory) {
+    private final ApplicationEnvironment applicationEnvironment;
+
+    private final TypeConversionService typeConversionService;
+
+    public InjectValueBeanPostProcessor(AnnotationConfigApplicationContext beanFactory,
+                                        ApplicationEnvironment applicationEnvironment,
+                                        TypeConversionService typeConversionService) {
         this.factory = beanFactory;
+        this.applicationEnvironment = applicationEnvironment;
+        this.typeConversionService = typeConversionService;
     }
 
     @Override
@@ -44,7 +55,8 @@ public class InjectValueBeanPostProcessor implements BeanPostProcessor {
         var type = field.getType();
         var annotationValue = field.getAnnotation(Value.class).value();
 
-        var resultedValue = ApplicationEnvironment.getPropertyResolvers().stream()
+
+        var resultedValue = Optional.of(applicationEnvironment.getPropertyResolver()).stream()
                 .filter(resolver -> resolver.canHandle(annotationValue))
                 .findFirst()
                 .map(pr -> pr.handle(annotationValue, type))
@@ -53,7 +65,7 @@ public class InjectValueBeanPostProcessor implements BeanPostProcessor {
 
         field.setAccessible(true);
 
-        Object convertedValue = TypeConversionService.convertValueIfPossible(resultedValue.getValue(), String.class, type);
+        Object convertedValue = typeConversionService.convertValueIfPossible(resultedValue.getValue(), String.class, type);
         try {
             field.set(bean, convertedValue);
         } catch (IllegalAccessException e) {

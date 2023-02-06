@@ -1,5 +1,6 @@
 package com.petros.bring.environment.convert;
 
+import com.petros.bring.annotations.Component;
 import org.junit.Assert;
 
 import java.util.IdentityHashMap;
@@ -12,17 +13,20 @@ import java.util.Set;
  * <p>
  * Further implementations of {@link TypeConverter} may contain String -> Array or String -> Map convertors.
  */
+@Component
 public class TypeConversionService {
 
     private static Map<Class<?>, Class<?>> primitiveTypeToWrapperMap;
-    private static Set<TypeConverter> converters;
+//    private static Set<TypeConverter> converters;
 
-    public TypeConversionService(Set<TypeConverter> converters) {
-        TypeConversionService.converters = converters;
+    private TypeConverter typeConverter;
+
+    public TypeConversionService(TypeConverter converter) {
+        this.typeConverter = converter;
         primitiveTypeToWrapperMap = fillMap();
     }
 
-    public static Object convertValueIfPossible(Object value, Class<?> sourceType, Class<?> targetType) {
+    public Object convertValueIfPossible(Object value, Class<?> sourceType, Class<?> targetType) {
         Assert.assertNotNull(sourceType);
         Assert.assertNotNull(targetType);
 
@@ -30,19 +34,15 @@ public class TypeConversionService {
             return value;
         } else {
             Class<?> finalTargetType = getObjectType(targetType);
-            return getConverter(sourceType, finalTargetType).convert(value, sourceType, finalTargetType);
+            if (typeConverter.canConvert(sourceType, finalTargetType)) {
+                return typeConverter.convert(value, sourceType, finalTargetType);
+            }
+            throw new TypeConversionException(sourceType.getName(), targetType.getName());
         }
     }
 
     private static Class<?> getObjectType(Class<?> targetType) {
         return (targetType.isPrimitive() && targetType != void.class ? primitiveTypeToWrapperMap.get(targetType) : targetType);
-    }
-
-    public static TypeConverter getConverter(Class<?> sourceType, Class<?> targetType) {
-        return converters.stream()
-                .filter(converter -> converter.canConvert(sourceType, targetType))
-                .findAny()
-                .orElseThrow(() -> new TypeConversionException(sourceType.getName(), targetType.getName()));
     }
 
     private static Map<Class<?>, Class<?>> fillMap() {

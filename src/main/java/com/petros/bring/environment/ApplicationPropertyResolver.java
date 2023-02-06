@@ -1,5 +1,6 @@
 package com.petros.bring.environment;
 
+import com.petros.bring.annotations.Component;
 import com.petros.bring.exception.UnsatisfiedPropertyValueException;
 
 /**
@@ -7,11 +8,18 @@ import com.petros.bring.exception.UnsatisfiedPropertyValueException;
  * "${variableKey}" or with a default value if no such value in properties file:
  * "${variableKey:defaultPropertyValue}"
  */
+@Component
 public class ApplicationPropertyResolver implements PropertyResolver {
 
     private static final String PROPS_PREFIX = "${";
     private static final String PROPS_SUFFIX = "}";
     private static final String PROP_DEFAULT_VALUE_SEPARATOR = ":";
+
+    private final ApplicationEnvironment applicationEnvironment;
+
+    public ApplicationPropertyResolver(ApplicationEnvironment applicationEnvironment) {
+        this.applicationEnvironment = applicationEnvironment;
+    }
 
     @Override
     public boolean canHandle(String propertyValue) {
@@ -36,7 +44,7 @@ public class ApplicationPropertyResolver implements PropertyResolver {
             value = rawValue;
         }
 
-        var valueFromProperties = ApplicationEnvironment.getProperty(value);
+        var valueFromProperties = applicationEnvironment.getProperty(value);
         if (valueFromProperties != null) {
             value = valueFromProperties;
         } else if (defaultValue != null) {
