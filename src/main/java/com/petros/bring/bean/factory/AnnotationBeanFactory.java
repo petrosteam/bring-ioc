@@ -8,6 +8,7 @@ import com.petros.bring.reader.BeanDefinitionRegistry;
 import com.petros.bring.reader.Scope;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -70,6 +71,16 @@ public class AnnotationBeanFactory implements BeanFactory {
 //                }
                 // check for circular dependencies
 //                obj = aClass.getConstructor().newInstance() with non default constructor
+
+                var dependency = beanDefinition.getDependsOn();
+                var dependencyClass = Arrays.stream(dependency)
+                        .findAny()
+                        .orElseThrow()
+                        .getConstructor()
+                        .newInstance();
+
+                obj = beanType.getConstructor(dependency).newInstance(dependencyClass);
+
             } else {
                 obj = beanType.getConstructor().newInstance();
             }
