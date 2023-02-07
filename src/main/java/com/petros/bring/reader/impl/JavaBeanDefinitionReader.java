@@ -10,13 +10,12 @@ import com.petros.bring.reader.BeanDefinitionReader;
 import com.petros.bring.reader.BeanDefinitionRegistry;
 import com.petros.bring.reader.Scope;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
 import org.reflections.Reflections;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Set;
-import java.util.stream.Collectors;
+
 
 @Component
 public class JavaBeanDefinitionReader implements BeanDefinitionReader {
@@ -24,7 +23,6 @@ public class JavaBeanDefinitionReader implements BeanDefinitionReader {
     private final BeanDefinitionRegistry beanDefinitionRegistry;
 
     public JavaBeanDefinitionReader(BeanDefinitionRegistry beanDefinitionRegistry) {
-        Assert.assertNotNull(beanDefinitionRegistry);
         this.beanDefinitionRegistry = beanDefinitionRegistry;
     }
 
