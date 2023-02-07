@@ -22,15 +22,15 @@ public class InjectValueBeanPostProcessor implements BeanPostProcessor {
 
     private final BeanFactory factory;
 
-    private final ApplicationEnvironment applicationEnvironment;
+    private final PropertyResolver propertyResolver;
 
     private final TypeConversionService typeConversionService;
 
     public InjectValueBeanPostProcessor(AnnotationConfigApplicationContext beanFactory,
-                                        ApplicationEnvironment applicationEnvironment,
+                                        PropertyResolver propertyResolver,
                                         TypeConversionService typeConversionService) {
         this.factory = beanFactory;
-        this.applicationEnvironment = applicationEnvironment;
+        this.propertyResolver = propertyResolver;
         this.typeConversionService = typeConversionService;
     }
 
@@ -55,12 +55,9 @@ public class InjectValueBeanPostProcessor implements BeanPostProcessor {
         var type = field.getType();
         var annotationValue = field.getAnnotation(Value.class).value();
 
-
-        var resultedValue = Optional.of(applicationEnvironment.getPropertyResolver()).stream()
-                .filter(resolver -> resolver.canHandle(annotationValue))
-                .findFirst()
-                .map(pr -> pr.handle(annotationValue, type))
-                .orElse(new PropertyData(annotationValue));
+        var resultedValue = propertyResolver.canHandle(annotationValue)
+                ? propertyResolver.handle(annotationValue, type)
+                : new PropertyData(annotationValue);
 
 
         field.setAccessible(true);

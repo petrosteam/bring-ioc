@@ -100,11 +100,8 @@ public class AnnotationBeanFactory implements BeanFactory {
             }
             T obj = null;
             if (beanDefinition.getDependsOn() != null && beanDefinition.getDependsOn().length != 0) {
-                var beansByType = new HashMap<>();
+                var beansByType = new LinkedHashMap<>();
                 for (Class<?> dependsOnClass : beanDefinition.getDependsOn()) {
-                    if (dependsOnClass.isAssignableFrom(Collection.class)) {
-                        dependsOnClass.getGenericInterfaces();
-                    }
                     //TODO: Please, refactor me
                     Object beanToInject = null;
                     if (!this.getOptionalBean(dependsOnClass).isPresent()) {

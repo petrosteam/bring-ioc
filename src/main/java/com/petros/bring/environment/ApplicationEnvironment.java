@@ -23,12 +23,8 @@ public class ApplicationEnvironment {
     public static final String BASE_APPLICATION_PROPERTIES_FILE = "application.properties";
 
     private static Map<String, String> applicationPropertiesMap;
-//    private static Set<PropertyResolver> propertyResolvers;
 
-    private final PropertyResolver propertyResolver;
-
-    public ApplicationEnvironment(PropertyResolver propertyResolver) {
-        this.propertyResolver = propertyResolver;
+    public ApplicationEnvironment() {
         readApplicationProperties();
     }
 
@@ -52,9 +48,5 @@ public class ApplicationEnvironment {
 
     public String getProperty(String propertyName) {
         return applicationPropertiesMap.get(propertyName);
-    }
-
-    public PropertyResolver getPropertyResolver() {
-        return propertyResolver;
     }
 }
