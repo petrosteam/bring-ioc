@@ -1,33 +1,27 @@
 package com.petros.bring.context;
 
+import com.petros.bring.annotations.Component;
 import com.petros.bring.bean.factory.AnnotationBeanFactory;
-import com.petros.bring.postprocessor.BeanPostProcessor;
-import com.petros.bring.reader.BeanDefinition;
 import com.petros.bring.reader.BeanDefinitionRegistry;
-import com.petros.bring.reader.Scope;
 
-import java.util.Arrays;
-import java.util.List;
+import static com.petros.bring.Utils.getClassByName;
 
+@Component(name = "annotationConfigApplicationContext")
 public class AnnotationConfigApplicationContext extends AnnotationBeanFactory {
 
-    public AnnotationConfigApplicationContext(BeanDefinitionRegistry registry, List<BeanPostProcessor> beanPostProcessors) {
-        super(registry, beanPostProcessors);
-        Arrays.stream(registry.getBeanDefinitionNames())
-                .map(registry::getBeanDefinition)
-                .forEach(this::registerBean);
+    public AnnotationConfigApplicationContext(BeanDefinitionRegistry registry) {
+        super(registry);
+        register(registry);
     }
 
-    private void registerBean(BeanDefinition beanDefinition) {
-        if (needsRegistration(beanDefinition)) {
-            getBean(registry.getBeanTypeByName(beanDefinition.getName()));
-        }
+    public void register(BeanDefinitionRegistry registry) {
+        rootContextMap.put("registry", registry);
+        registry.getBeanDefinitions().forEach(this::create);
+        rootContextMap.values().forEach(bean -> postProcessBean(getClassByName(bean.getClass().getName()), bean));
     }
 
-    private boolean needsRegistration(BeanDefinition beanDefinition) {
-        if (Scope.PROTOTYPE.equals(beanDefinition.getScope())) {
-            return false;
-        }
-        return rootContextMap.get(beanDefinition.getName()) == null;
+    public void register() {
+        registry.getBeanDefinitions().forEach(this::create);
+        rootContextMap.values().forEach(bean -> postProcessBean(getClassByName(bean.getClass().getName()), bean));
     }
 }

@@ -1,7 +1,9 @@
 package com.petros.bring.postprocessor;
 
 import com.petros.bring.annotations.Autowired;
+import com.petros.bring.annotations.Component;
 import com.petros.bring.bean.factory.BeanFactory;
+import com.petros.bring.context.AnnotationConfigApplicationContext;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -11,28 +13,37 @@ import java.util.Arrays;
 /**
  * The type Autowire methods bean post processor. Wires bean method parameters marked with autowire.
  */
+@Component
 public class AutowireMethodsBeanPostProcessor implements BeanPostProcessor {
+
+    private final BeanFactory factory;
+
+    public AutowireMethodsBeanPostProcessor(AnnotationConfigApplicationContext beanFactory) {
+        this.factory = beanFactory;
+    }
 
     /**
      * Wires bean method parameters marked with autowire.
      * Wires only methods with one parameter.
      *
-     * @param beanType              type of bean
-     * @param obj                   instance of a bean
-     * @param annotationBeanFactory factory to get bean by parameter type
-     * @param <T>                   return bean instance
+     * @param beanClass              type of bean
+     * @param bean                   instance of a bean
      */
     @Override
-    public <T> void postProcessBeforeInitialization(Class<T> beanType, T obj, BeanFactory annotationBeanFactory) {
-        Arrays.stream(beanType.getDeclaredMethods()).filter(method -> method.isAnnotationPresent(Autowired.class)).forEach(method -> wireMethod(method, obj, annotationBeanFactory));
+    public Object postProcessBeforeInitialization(Class<?> beanClass, Object bean) {
+        Arrays.stream(beanClass.getDeclaredMethods())
+                .filter(method -> method.isAnnotationPresent(Autowired.class))
+                .forEach(method -> wireMethod(method, bean));
+        return bean;
     }
 
-    private <T> void wireMethod(Method method, T obj, BeanFactory beanFactory) {
+    private <T> void wireMethod(Method method, T obj) {
         Parameter[] parameters = method.getParameters();
         if (parameters.length != 1) {
-            throw new RuntimeException(String.format("Unexpected number of parameters for the metod with Autowire annotation. One is expeced but %s actual", parameters.length));
+            throw new RuntimeException(String.format("Unexpected number of parameters for the metod with Autowire " +
+                    "annotation. One is expected but %s actual", parameters.length));
         }
-        Object beanToWire = beanFactory.getBean(parameters[0].getType());
+        Object beanToWire = factory.getBean(parameters[0].getType());
         try {
             method.invoke(obj, beanToWire);
         } catch (IllegalAccessException | InvocationTargetException e) {

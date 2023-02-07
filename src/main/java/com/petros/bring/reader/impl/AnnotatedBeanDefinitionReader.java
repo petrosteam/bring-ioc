@@ -13,7 +13,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.reflections.Reflections;
 
-import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.Set;
 
@@ -23,6 +22,7 @@ import java.util.Set;
  * scans class from provided package and
  * registers them into BeanDefinitionRegistry
  */
+@Component
 public class AnnotatedBeanDefinitionReader implements BeanDefinitionReader {
 
     private final BeanDefinitionRegistry beanDefinitionRegistry;
@@ -64,22 +64,23 @@ public class AnnotatedBeanDefinitionReader implements BeanDefinitionReader {
 
     private Class<?>[] getDependsOn(Class<?> aClass) {
         var constructors = aClass.getDeclaredConstructors();
+
         var constrCount = constructors.length;
         if (constrCount > 1) {
-            throw new ClassConctructorException(aClass.getName() + " Class have more than one constructor");
+            throw new ClassConctructorException(aClass.getName() + " Class has more than one constructor");
         } else if (constrCount == 0) {
-            throw new ClassConctructorException(aClass.getName() + " Class have not public constructor");
+            throw new ClassConctructorException(aClass.getName() + " Class has not public constructor");
         }
-        var constructorParamsList = Arrays.stream(Arrays.stream(constructors)
-                        .map(Constructor::getParameterTypes)
-                        .findAny()
-                        .orElseThrow())
-                .toList();
+
+        var constructor = constructors[0];
+
+        var constructorParamsList = Arrays.asList(constructor.getParameterTypes());
+
         if (constructorParamsList.size() == 0) {
             return null;
         }
-        var classesArray = new Class<?>[constructorParamsList.size()];
-        return constructorParamsList.toArray(classesArray);
+
+        return constructorParamsList.toArray(new Class<?>[constructorParamsList.size()]);
     }
 
     private boolean isPrimary(Class<?> aClass) {

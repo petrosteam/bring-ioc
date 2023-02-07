@@ -1,5 +1,6 @@
 package com.petros.bring.environment.convert;
 
+import com.petros.bring.annotations.Component;
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
@@ -9,6 +10,7 @@ import java.math.BigInteger;
  * Implementation of {@link TypeConverter} that converts String value of any instance of Number
  * to required Class
  */
+@Component
 public class StringToNumberTypeConverter implements TypeConverter {
 
     @Override
