@@ -16,7 +16,6 @@ import org.reflections.Reflections;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 public class JavaBeanDefinitionReader implements BeanDefinitionReader {
@@ -47,13 +46,13 @@ public class JavaBeanDefinitionReader implements BeanDefinitionReader {
     }
 
     private BeanDefinition createBeanDefinition(Method method) {
-        return BeanDefinitionImpl.BeanDefinitionBuilder.newInstance()
-                .withBeanClassName(method.getReturnType().getName())
-                .withName(getBeanName(method))
-                .withScope(getBeanScope(method))
-                .withIsLazy(isLazy(method))
-                .withIsPrimary(isPrimary(method))
-                .createBeanDefinitionImpl();
+        return BeanDefinitionImpl.builder()
+                .beanClassName(method.getReturnType().getName())
+                .name(getBeanName(method))
+                .scope(getBeanScope(method))
+                .isLazy(isLazy(method))
+                .isPrimary(isPrimary(method))
+                .build();
     }
 
     private boolean isPrimary(Method method) {
