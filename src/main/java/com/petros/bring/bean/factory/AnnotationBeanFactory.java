@@ -3,6 +3,7 @@ package com.petros.bring.bean.factory;
 import com.petros.bring.annotations.Component;
 import com.petros.bring.annotations.Primary;
 import com.petros.bring.exception.BeanCreationException;
+import com.petros.bring.exception.CircularDependencyException;
 import com.petros.bring.exception.NoSuchBeanException;
 import com.petros.bring.exception.NoUniqueBeanException;
 import com.petros.bring.postprocessor.BeanPostProcessor;
@@ -26,6 +27,7 @@ public class AnnotationBeanFactory implements BeanFactory {
 
     protected BeanDefinitionRegistry registry;
     protected static final Map<String, Object> rootContextMap = new ConcurrentHashMap<>();
+    private final Set<String> circularDependencies = new LinkedHashSet<>();
 
     public AnnotationBeanFactory(BeanDefinitionRegistry registry) {
         this.registry = registry;
@@ -102,19 +104,9 @@ public class AnnotationBeanFactory implements BeanFactory {
             if (beanDefinition.getDependsOn() != null && beanDefinition.getDependsOn().length != 0) {
                 var beansByType = new LinkedHashMap<>();
                 for (Class<?> dependsOnClass : beanDefinition.getDependsOn()) {
-                    //TODO: Please, refactor me
-                    Object beanToInject = null;
-                    if (!this.getOptionalBean(dependsOnClass).isPresent()) {
-                        beanToInject =
-                                this.registry.getBeanDefinitionsByType(dependsOnClass).stream()
-                                        .findFirst()
-                                        .map(this::create)
-                                        .orElseThrow(
-                                                () -> new BeanCreationException("Could not create bean with type: " + dependsOnClass.getName())
-                                        );
-                    } else {
-                        beanToInject = this.getOptionalBean(dependsOnClass).get();
-                    }
+                    Object beanToInject = this.getOptionalBean(dependsOnClass).isPresent()
+                            ? this.getOptionalBean(dependsOnClass).get()
+                            : createDependentBean(dependsOnClass);
                     beansByType.put(dependsOnClass, beanToInject);
                 }
                 return (T) clazz.getConstructor(beansByType.keySet().toArray(new Class<?>[]{}))
@@ -126,6 +118,27 @@ public class AnnotationBeanFactory implements BeanFactory {
                  NoSuchMethodException e) {
             throw new BeanCreationException(beanDefinition, e);
         }
+    }
+
+    private <T> T createDependentBean(Class<T> dependsOnClass) {
+        checkCircularDependency(dependsOnClass.getSimpleName());
+        Object o = this.registry.getBeanDefinitionsByType(dependsOnClass).stream()
+                .findFirst()
+                .map(this::create)
+                .orElseThrow(
+                        () -> new BeanCreationException("Could not create bean with type: " + dependsOnClass.getName())
+                );
+        circularDependencies.remove(dependsOnClass.getSimpleName());
+        return dependsOnClass.cast(o);
+    }
+
+    private void checkCircularDependency(String name) {
+        if (circularDependencies.contains(name)) {
+            circularDependencies.add(name + "!");
+            throw new CircularDependencyException(String.format("Could not initialize application. " +
+                    "Circular dependencies are found: " + String.join("->", circularDependencies)));
+        }
+        circularDependencies.add(name);
     }
 
     private void ensureBeanDefinitionsCreated(Set<BeanDefinition> beanDefinitions) {
