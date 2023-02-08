@@ -1,11 +1,9 @@
 package com.petros.bring.environment.convert;
 
 import com.petros.bring.annotations.Component;
-import org.junit.Assert;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Utility class that helps to convert an object from one class to another like:
@@ -26,8 +24,6 @@ public class TypeConversionService {
     }
 
     public Object convertValueIfPossible(Object value, Class<?> sourceType, Class<?> targetType) {
-        Assert.assertNotNull(sourceType);
-        Assert.assertNotNull(targetType);
 
         if (String.class.isAssignableFrom(targetType)) {
             return value;

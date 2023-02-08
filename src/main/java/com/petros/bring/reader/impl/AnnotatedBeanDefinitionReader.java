@@ -10,7 +10,6 @@ import com.petros.bring.reader.BeanDefinitionReader;
 import com.petros.bring.reader.BeanDefinitionRegistry;
 import com.petros.bring.reader.Scope;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
 import org.reflections.Reflections;
 
 import java.util.Arrays;
@@ -33,7 +32,6 @@ public class AnnotatedBeanDefinitionReader implements BeanDefinitionReader {
      * @param beanDefinitionRegistry the bean definition registry
      */
     public AnnotatedBeanDefinitionReader(BeanDefinitionRegistry beanDefinitionRegistry) {
-        Assert.assertNotNull(beanDefinitionRegistry);
         this.beanDefinitionRegistry = beanDefinitionRegistry;
     }
 
