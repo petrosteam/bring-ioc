@@ -91,11 +91,12 @@ class AnnotatedBeanDefinitionReaderTest {
     @DisplayName("Register new bean definition")
     void checkNewBeanDefinitionRegister() {
         beanDefinitionRegistry.registerBeanDefinition("newComer".getClass(),
-                BeanDefinitionImpl.BeanDefinitionBuilder.newInstance()
-                        .withBeanClassName("className")
-                        .withName("newComer")
-                        .createBeanDefinitionImpl());
-        assertEquals(beanDefinitionRegistry.getBeanDefinition("newComer").getName(), "newComer");
+                BeanDefinitionImpl.builder()
+                        .beanClassName("className")
+                        .name("newComer")
+                        .build());
+         assertEquals(beanDefinitionRegistry.getBeanDefinition("newComer").getName(), "newComer");
+
     }
 
     @Test

@@ -50,14 +50,14 @@ public class AnnotatedBeanDefinitionReader implements BeanDefinitionReader {
     }
 
     private BeanDefinition createBeanDefinition(Class<?> aClass) {
-        return BeanDefinitionImpl.BeanDefinitionBuilder.newInstance()
-                .withBeanClassName(aClass.getName())
-                .withName(getBeanName(aClass))
-                .withScope(getBeanScope(aClass))
-                .withIsLazy(isLazy(aClass))
-                .withIsPrimary(isPrimary(aClass))
-                .withDependsOn(getDependsOn(aClass))
-                .createBeanDefinitionImpl();
+        return BeanDefinitionImpl.builder()
+                .beanClassName(aClass.getName())
+                .name(getBeanName(aClass))
+                .scope(getBeanScope(aClass))
+                .isLazy(isLazy(aClass))
+                .isPrimary(isPrimary(aClass))
+                .dependsOn(getDependsOn(aClass))
+                .build();
     }
 
     private Class<?>[] getDependsOn(Class<?> aClass) {
