@@ -3,10 +3,12 @@ package com.petros.bring.postprocessor;
 
 import com.petros.bring.annotations.Autowired;
 import com.petros.bring.annotations.Component;
+import com.petros.bring.annotations.Qualifier;
 import com.petros.bring.bean.factory.AnnotationBeanFactory;
 import com.petros.bring.bean.factory.BeanFactory;
 import com.petros.bring.context.AnnotationConfigApplicationContext;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 
 @Component
@@ -29,7 +31,7 @@ public class AutowiredAnnotationBeanPostProcessor implements BeanPostProcessor {
             var beanToInject = this.getBean(value, fieldType);
             field.setAccessible(true);
             try {
-                field.set(bean, beanToInject);
+                field.set(bean, getDependencyForField(field, factory));
             } catch (IllegalAccessException e) {
                 throw new RuntimeException("Can not inject: %s to %s".formatted(beanToInject, bean));
             }
@@ -43,5 +45,13 @@ public class AutowiredAnnotationBeanPostProcessor implements BeanPostProcessor {
         } else {
             return factory.getBean(beanName, clazz);
         }
+    }
+
+    private Object getDependencyForField(Field field, BeanFactory beanFactory) {
+        if (field.isAnnotationPresent(Qualifier.class)) {
+            var beanName = field.getAnnotation(Qualifier.class).value();
+            return beanFactory.getBean(beanName, field.getType());
+        }
+        return beanFactory.getBean(field.getType());
     }
 }
