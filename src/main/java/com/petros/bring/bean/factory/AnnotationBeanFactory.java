@@ -42,6 +42,13 @@ public class AnnotationBeanFactory implements BeanFactory {
                 );
     }
 
+    /**
+     * Getting optional bean with prototype scope.
+     * If bean was defined with a prototype scope, the new object will be created on every call to the context
+     * @param beanType bean type
+     * @return Optional of bean object
+     * @param <T> bean type
+     */
     public <T> Optional<T> getPrototypeBeanByType(Class<T> beanType) {
         return this.registry.getBeanDefinitionsByType(beanType)
                 .stream()
@@ -51,6 +58,13 @@ public class AnnotationBeanFactory implements BeanFactory {
                 .findFirst();
     }
 
+    /**
+     * Getting optional bean from the context by the bean type
+     * If more than one bean registered with this type, the primary bean is retrieved
+     * @param beanType bean type
+     * @return optional of bean object
+     * @param <T> object type
+     */
     private <T> Optional<T> getOptionalBean(Class<T> beanType) {
         var matchingBeans = getAllBeans(beanType);
         if (matchingBeans.size() > 1) {
@@ -63,61 +77,79 @@ public class AnnotationBeanFactory implements BeanFactory {
                 .findFirst();
     }
 
+    /**
+     * Creating bean from the bean definition
+     * @param beanDefinition bean definition
+     * @return bean object
+     * @param <T> type of the bean
+     */
     public <T> T create(BeanDefinition beanDefinition) {
+        log.trace("[{}] creating bean", beanDefinition.getName());
         var bean = this.<T>createBean(beanDefinition);
         if (!beanDefinition.getScope().equals(Scope.PROTOTYPE)) {
+            log.trace("[{}] has SINGLETON scope. Adding to context", beanDefinition.getName());
             rootContextMap.put(beanDefinition.getName(), bean);
         }
+        log.trace("[{}] has been created", beanDefinition.getName());
         return bean;
     }
 
-    public <T> Collection<T> create(Class<T> beanType) {
-        var beanDefinitions = this.registry.getBeanDefinitionsByType(beanType);
-        var definitionsMap = beanDefinitions.stream()
-                .collect(Collectors.toMap(
-                        Function.identity(),
-                        this::<T>createBean
-                ));
-
-        definitionsMap.values().forEach(bean -> this.postProcessBean(beanType, bean));
-        definitionsMap.forEach((key, value) -> rootContextMap.put(key.getName(), value));
-        return definitionsMap.values();
-    }
-
+    /**
+     * Post process bean object with all registered post processors in the context
+     * @param beanType bean type
+     * @param bean bean object
+     */
     public void postProcessBean(Class<?> beanType, Object bean) {
         for (BeanPostProcessor postProcessor : getAllBeans(BeanPostProcessor.class).values()) {
+            log.trace("[{}] post processing started", beanType.getSimpleName());
             postProcessor.postProcessBeforeInitialization(beanType, bean);
             postProcessor.postProcessAfterInitialization(beanType, bean);
+            log.trace("[{}] post processing finished", beanType.getSimpleName());
         }
     }
 
+    /**
+     * Creating bean from bean definition
+     * This method does not make any validation and used only for bean instantiation
+     * @param beanDefinition bean definition
+     * @return bean object
+     * @param <T> bean type
+     */
     @SuppressWarnings("unchecked")
     private <T> T createBean(BeanDefinition beanDefinition) {
+        log.trace("[{}] instantiation", beanDefinition.getName());
         try {
             var clazz = getClassByName(beanDefinition.getBeanClassName());
-            // We've created beans here (com/petros/bring/context/AnnotationConfigApplicationContext.java:19) but also
-            // call this method recursively that causes creating duplicates
-            if (rootContextMap.containsKey(beanDefinition.getName())) {
-                return (T) getBean(beanDefinition.getName(), clazz);
-            }
-            T obj = null;
             if (beanDefinition.getDependsOn() != null && beanDefinition.getDependsOn().length != 0) {
+                log.trace("[{}] contains dependant beans", beanDefinition.getName());
                 var beansByType = new LinkedHashMap<>();
                 for (Class<?> dependsOnClass : beanDefinition.getDependsOn()) {
-                    Object beanToInject = this.getOptionalBean(dependsOnClass).isPresent()
-                            ? this.getOptionalBean(dependsOnClass).get()
-                            : createDependentBean(dependsOnClass);
+                    var beanToInject = this.getBeanToInject(dependsOnClass);
                     beansByType.put(dependsOnClass, beanToInject);
+                    log.trace("[{}] adding bean to inject {}", beanDefinition.getName(), clazz.getName());
                 }
+                log.trace("[{}] creating bean with non-default constructor", beanDefinition.getName());
                 return (T) clazz.getConstructor(beansByType.keySet().toArray(new Class<?>[]{}))
                         .newInstance(beansByType.values().toArray());
             } else {
+                log.trace("[{}] creating bean with default constructor", beanDefinition.getName());
                 return (T) clazz.getConstructor().newInstance();
             }
         } catch (InvocationTargetException | InstantiationException | IllegalAccessException |
                  NoSuchMethodException e) {
+            log.error("[{}] Could not instantiate bean: {}", beanDefinition.getName(), e);
             throw new BeanCreationException(beanDefinition, e);
         }
+    }
+
+    /**
+     * Getting bean for injection. If bean is not found, we create another one
+     * @param dependsOnClass dependant bean class
+     * @return bean object
+     * @param <T> bean type
+     */
+    private <T> Object getBeanToInject(Class<T> dependsOnClass) {
+        return getOptionalBean(dependsOnClass).orElseGet(() -> createDependentBean(dependsOnClass));
     }
 
     private <T> T createDependentBean(Class<T> dependsOnClass) {
@@ -139,16 +171,6 @@ public class AnnotationBeanFactory implements BeanFactory {
                     "Circular dependencies are found: " + String.join("->", circularDependencies)));
         }
         circularDependencies.add(name);
-    }
-
-    private void ensureBeanDefinitionsCreated(Set<BeanDefinition> beanDefinitions) {
-        beanDefinitions.forEach(bd -> {
-            try {
-                getBean(Class.forName(bd.getBeanClassName()));
-            } catch (ClassNotFoundException e) {
-                throw new RuntimeException(String.format("Not able to find class %s", bd.getBeanClassName()), e);
-            }
-        });
     }
 
 

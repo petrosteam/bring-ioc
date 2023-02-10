@@ -4,6 +4,7 @@ import com.petros.bring.annotations.Autowired;
 import com.petros.bring.annotations.Component;
 import com.petros.bring.bean.factory.BeanFactory;
 import com.petros.bring.context.AnnotationConfigApplicationContext;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -14,6 +15,7 @@ import java.util.Arrays;
  * The type Autowire methods bean post processor. Wires bean method parameters marked with autowire.
  */
 @Component
+@Slf4j
 public class AutowireMethodsBeanPostProcessor implements BeanPostProcessor {
 
     private final BeanFactory factory;
@@ -45,7 +47,9 @@ public class AutowireMethodsBeanPostProcessor implements BeanPostProcessor {
         }
         Object beanToWire = factory.getBean(parameters[0].getType());
         try {
+            log.trace("Trying to invoke method autowiring...");
             method.invoke(obj, beanToWire);
+            log.trace("Method autowiring complete!");
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(String.format("Unexpected exception while wire object=%s, method=%s", obj, method.getName()), e);
         }

@@ -9,15 +9,16 @@ import com.petros.bring.environment.PropertyData;
 import com.petros.bring.environment.PropertyResolver;
 import com.petros.bring.environment.convert.TypeConversionService;
 import com.petros.bring.exception.UnsatisfiedPropertyValueException;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
-import java.util.Optional;
 
 /**
  * Implementation of PostProcessor needed for injection values to fields annotated with annotation {@link Value}
  */
 @Component
+@Slf4j
 public class InjectValueBeanPostProcessor implements BeanPostProcessor {
 
     private final BeanFactory factory;
@@ -64,11 +65,11 @@ public class InjectValueBeanPostProcessor implements BeanPostProcessor {
 
         Object convertedValue = typeConversionService.convertValueIfPossible(resultedValue.getValue(), String.class, type);
         try {
+            log.trace("Setting field value for bean {}... ", bean.getClass().getSimpleName());
             field.set(bean, convertedValue);
+            log.trace("Set field value for bean {} completed@", bean.getClass().getSimpleName());
         } catch (IllegalAccessException e) {
             throw new UnsatisfiedPropertyValueException(e.getLocalizedMessage());
         }
-
-
     }
 }

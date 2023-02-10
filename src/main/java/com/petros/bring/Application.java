@@ -2,25 +2,37 @@ package com.petros.bring;
 
 import com.petros.bring.bean.factory.BeanFactory;
 import com.petros.bring.context.AnnotationConfigApplicationContext;
-import com.petros.bring.environment.ApplicationEnvironment;
-import com.petros.bring.environment.PropertyResolver;
-import com.petros.bring.environment.convert.TypeConversionService;
-import com.petros.bring.environment.convert.TypeConverter;
-import com.petros.bring.exception.ApplicationEnvironmentException;
-import com.petros.bring.exception.RunApplicationContextException;
 import com.petros.bring.reader.BeanDefinitionReader;
-import com.petros.bring.reader.BeanDefinitionRegistry;
 import com.petros.bring.reader.impl.AnnotatedBeanDefinitionReader;
 import com.petros.bring.reader.impl.BeanDefinitionRegistryImpl;
-import org.reflections.Reflections;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.core.config.DefaultConfiguration;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Objects;
 
-public class Application {
-    private static final String BRING_BASE_PACKAGE = "com.petros.bring";
-    private static final Reflections innerReflections = new Reflections(BRING_BASE_PACKAGE);
 
+/**
+ * Entry point of Bring container.
+ * Static methods of this class scans beans by provided package and creates application context.
+ *
+ * Current implementation of IoC container scans itself for components. All these components are available in
+ * application context (like a bean post processors, bean factory, registry)
+ */
+@Slf4j
+public final class Application {
+    private static final String LOGO = """ 
+                        
+            _|_|_|    _|_|_|_|  _|_|_|_|_|  _|_|_|      _|_|      _|_|_|      _|_|_|    _|_|_|    _|_|_|  _|      _|    _|_|_| \s
+            _|    _|  _|            _|      _|    _|  _|    _|  _|            _|    _|  _|    _|    _|    _|_|    _|  _|       \s
+            _|_|_|    _|_|_|        _|      _|_|_|    _|    _|    _|_|        _|_|_|    _|_|_|      _|    _|  _|  _|  _|  _|_| \s
+            _|        _|            _|      _|    _|  _|    _|        _|      _|    _|  _|    _|    _|    _|    _|_|  _|    _| \s
+            _|        _|_|_|_|      _|      _|    _|    _|_|    _|_|_|        _|_|_|    _|    _|  _|_|_|  _|      _|    _|_|_| \s
+            """;
+
+    // There are internal bring packages are used for self-scanning
     private static final String[] INTERNAL_PACKAGES = new String[]{
             "com.petros.bring.reader",
             "com.petros.bring.context",
@@ -28,20 +40,51 @@ public class Application {
             "com.petros.bring.environment"
     };
 
-
+    /**
+     * Run scanning package with default logging level (DEBUG)
+     * @param packageName package name
+     * @return BeanFactory instance
+     */
     public static BeanFactory run(String packageName) {
+        return run(packageName, Level.INFO);
+    }
+
+    /**
+     * Run scanning package with defined loggin level
+     * @param packageName package name
+     * @param loggingLevel logging level
+     * @return BeanFactory instance
+     */
+    public static BeanFactory run(String packageName, Level loggingLevel) {
+        Objects.requireNonNull(packageName, "Package should not be null");
+
+        Configurator.initialize(new DefaultConfiguration());
+        Configurator.setRootLevel(loggingLevel);
+
+        log.trace(LOGO);
+
         var context = initFactory();
+        log.trace("Bring internal context has been initialized");
         var factory = context.getBean(AnnotationConfigApplicationContext.class);
         var readers = context.getAllBeans(BeanDefinitionReader.class);
-        readers.values().forEach(reader -> reader.loadBeanDefinitions(packageName));
+        log.trace("Loading bean definitions...");
+        var definitions = readers.values().stream().mapToInt(reader -> reader.loadBeanDefinitions(packageName)).sum();
+        log.trace("Loaded {} bean definitions from {} ", definitions, packageName);
         factory.register();
         return context.getBean(BeanFactory.class);
     }
 
+    /**
+     * Scanning internal packages, creating a bean factory from bring-specific components
+     * @return bean factory
+     */
     private static AnnotationConfigApplicationContext initFactory() {
+        log.trace("Start scanning internal packages");
         var registry = new BeanDefinitionRegistryImpl();
         var reader = new AnnotatedBeanDefinitionReader(registry);
-        Arrays.stream(INTERNAL_PACKAGES).forEach(reader::loadBeanDefinitions);
+        log.trace("Loading internal bean definitions");
+        var definitions = Arrays.stream(INTERNAL_PACKAGES).mapToInt(reader::loadBeanDefinitions).sum();
+        log.trace("Loaded {} bean definitions", definitions);
         return new AnnotationConfigApplicationContext(registry);
     }
 }
