@@ -6,9 +6,6 @@ import com.petros.bring.reader.BeanDefinitionReader;
 import com.petros.bring.reader.impl.AnnotatedBeanDefinitionReader;
 import com.petros.bring.reader.impl.BeanDefinitionRegistryImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.core.config.Configurator;
-import org.apache.logging.log4j.core.config.DefaultConfiguration;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -17,7 +14,7 @@ import java.util.Objects;
 /**
  * Entry point of Bring container.
  * Static methods of this class scans beans by provided package and creates application context.
- *
+ * <p>
  * Current implementation of IoC container scans itself for components. All these components are available in
  * application context (like a bean post processors, bean factory, registry)
  */
@@ -40,26 +37,15 @@ public final class Application {
             "com.petros.bring.environment"
     };
 
-    /**
-     * Run scanning package with default logging level (DEBUG)
-     * @param packageName package name
-     * @return BeanFactory instance
-     */
-    public static BeanFactory run(String packageName) {
-        return run(packageName, Level.INFO);
-    }
 
     /**
      * Run scanning package with defined loggin level
-     * @param packageName package name
-     * @param loggingLevel logging level
+     *
+     * @param packageName  package name
      * @return BeanFactory instance
      */
-    public static BeanFactory run(String packageName, Level loggingLevel) {
+    public static BeanFactory run(String packageName) {
         Objects.requireNonNull(packageName, "Package should not be null");
-
-        Configurator.initialize(new DefaultConfiguration());
-        Configurator.setRootLevel(loggingLevel);
 
         log.trace(LOGO);
 
@@ -76,6 +62,7 @@ public final class Application {
 
     /**
      * Scanning internal packages, creating a bean factory from bring-specific components
+     *
      * @return bean factory
      */
     private static AnnotationConfigApplicationContext initFactory() {
