@@ -23,11 +23,6 @@ public interface BeanDefinition {
     Scope getScope();
 
     /**
-     * Return whether the bean should be instantiated lazily
-     */
-    boolean isLazy();
-
-    /**
      * Return whether the bean should be considered as a prime candidate for autowiring
      */
     boolean isPrimary();
