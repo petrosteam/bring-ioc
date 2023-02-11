@@ -24,6 +24,50 @@
 
 ## Annotations
 
+### @Component
+Indicates that instance of class annotated @Component will be created and placed in context.
+Example:
+```java
+ @Component(name = "beanName", scope = Scope.PROTOTYPE)
+ public class SomeComponent {
+ }
+```
+Annotation has two arguments:
+
+name - name that will be assigned to bean in context. 
+If name is omitted - uncapitalized class name will be used for bean naming.
+
+scope - indicates if bean is stored in context or created new one if needed. 
+There are two possible values: 
+1. SINGLETON - means that bean of class will be created on application start up and placed in context;
+2. PROTOTYPE - every time when context will be asked to provide a bean of such class, then new instance will be created.
+   It means that prototype beans are not stored in context.
+
+### @Configuration
+
+Indicates that class can contain one or more methods annotated @Bean.
+
+### @Bean
+
+Indicates that method produces bean that can be managed by Bring context.
+This annotation can be used only in classes annotated @Configuration.
+
+Example, here two beans with names "beanName" and "senderService" will be placed in context
+```java
+@Configuration
+public class SomeConfiguration {
+  @Bean(name = "beanName")
+  public MessageService messageService() {
+    return new MessageServiceImpl();
+  }
+
+  @Bean
+  public SenderService senderService() {
+    return new SenderServiceImpl(messageService());
+  }
+}
+```
+
 ### @Autowired
 
 @Autowired annotation allows to mark a field property or a method with only one class as parameter. 
@@ -70,6 +114,28 @@ public class JavadocExampleClass {
     public ExampleService exampleService;
 }
 ```
+
+### @Primary
+
+Indicates that bean of this class should be taken when multiple candidates are qualified to autowire.
+
+Example: here instance of class HelloMessageService will be autowired. 
+If @Primary is omitted, then NoUniqueBeanException is thrown.
+```java
+@Primary
+@Component
+public class HelloMessageService implements MessageService {}
+
+@Component
+public class GoodbyeMessageService implements MessageService {}
+
+@Component
+public class SomeSenderService {
+    @Autowired
+    private MessageService messageService;
+}
+```
+
 ### @Value
 
 @Value is an annotation that sets a value to a variable of a Class. There are 2 ways of usage:
