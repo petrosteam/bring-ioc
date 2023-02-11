@@ -1,10 +1,14 @@
-package com.petros.bring;
+package com.petros.bring.value;
 
+import com.petros.bring.Application;
 import com.petros.bring.bean.factory.BeanFactory;
 import com.petros.bring.main.services.autowired.fields.ServiceWithInjectedFieldValues;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -29,5 +33,8 @@ public class ValueFieldInjectionTest {
         assertEquals(4, service.getDefaultShortValue());
         assertEquals(5, service.getDefaultByteValue());
         assertEquals("defaultValueInsteadOfProperties", service.getAbsentValueFromApplicationProperties());
+        assertEquals(BigInteger.valueOf(6), service.getBigIntegerValue());
+        assertEquals(7.0f, service.getFloatValue());
+        assertEquals(BigDecimal.valueOf(8.0), service.getBigDecimalValue());
     }
 }

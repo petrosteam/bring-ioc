@@ -3,6 +3,9 @@ package com.petros.bring.main.services.autowired.fields;
 import com.petros.bring.annotations.Component;
 import com.petros.bring.annotations.Value;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 @Component(name = "serviceWithInjectedFieldValues")
 public class ServiceWithInjectedFieldValues {
 
@@ -18,6 +21,12 @@ public class ServiceWithInjectedFieldValues {
     private short defaultShortValue;
     @Value("5")
     private byte defaultByteValue;
+    @Value("6")
+    private BigInteger bigIntegerValue;
+    @Value("7.0")
+    private Float floatValue;
+    @Value("8.0")
+    private BigDecimal bigDecimalValue;
     @Value("${absentStringValFromProperties:defaultValueInsteadOfProperties}")
     private String absentValueFromApplicationProperties;
 
@@ -47,5 +56,17 @@ public class ServiceWithInjectedFieldValues {
 
     public String getAbsentValueFromApplicationProperties() {
         return absentValueFromApplicationProperties;
+    }
+
+    public BigInteger getBigIntegerValue() {
+        return bigIntegerValue;
+    }
+
+    public Float getFloatValue() {
+        return floatValue;
+    }
+
+    public BigDecimal getBigDecimalValue() {
+        return bigDecimalValue;
     }
 }
