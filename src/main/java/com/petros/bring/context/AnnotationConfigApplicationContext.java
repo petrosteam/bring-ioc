@@ -10,11 +10,11 @@ import static com.petros.bring.Utils.getClassByName;
 @Component(name = "annotationConfigApplicationContext")
 @Slf4j
 public class AnnotationConfigApplicationContext extends AnnotationBeanFactory {
-    private final String REGISTRY = "registry";
+    private static final String CONTEXT = "annotationConfigApplicationContext";
+    private static final String REGISTRY = "registry";
 
     public AnnotationConfigApplicationContext(BeanDefinitionRegistry registry) {
         super(registry);
-        register();
     }
 
     /**
@@ -26,7 +26,8 @@ public class AnnotationConfigApplicationContext extends AnnotationBeanFactory {
      */
     public void register() {
         log.trace("Setting registry...");
-        rootContextMap.put(REGISTRY, registry);
+        rootContextMap.putIfAbsent(REGISTRY, registry);
+        rootContextMap.putIfAbsent(CONTEXT, this);
         log.debug("Bean registration started");
         for (var beanDefinition : registry.getBeanDefinitions()) {
             log.trace("[{}] start processing bean", beanDefinition.getName());
