@@ -19,7 +19,6 @@ public class BeanDefinitionImpl implements BeanDefinition {
     private String name;
     private String beanClassName;
     private Scope scope;
-    private boolean isLazy;
     private boolean isPrimary;
     private Class<?>[] dependsOn;
     private Class<?> factoryBeanClass;
@@ -40,11 +39,6 @@ public class BeanDefinitionImpl implements BeanDefinition {
     @Override
     public Scope getScope() {
         return scope;
-    }
-
-    @Override
-    public boolean isLazy() {
-        return isLazy;
     }
 
     @Override

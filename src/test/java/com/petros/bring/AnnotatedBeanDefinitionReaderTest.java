@@ -73,13 +73,6 @@ class AnnotatedBeanDefinitionReaderTest {
     }
 
     @Test
-    @Order(6)
-    @DisplayName("SimpleService bean definition lazyness")
-    void checkSimpleServiceBeanDefinitionLazy() {
-        assertTrue(beanDefinitionRegistry.getBeanDefinition("booblik").isLazy());
-    }
-
-    @Test
     @Order(7)
     @DisplayName("SimpleService bean definition primary")
     void checkSimpleServiceBeanDefinitionPrimary() {

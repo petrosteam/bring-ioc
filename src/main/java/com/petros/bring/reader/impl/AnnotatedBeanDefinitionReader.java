@@ -2,7 +2,6 @@ package com.petros.bring.reader.impl;
 
 import com.petros.bring.annotations.Component;
 import com.petros.bring.annotations.Configuration;
-import com.petros.bring.annotations.Lazy;
 import com.petros.bring.annotations.Primary;
 import com.petros.bring.exception.BeanDefinitionStoreException;
 import com.petros.bring.exception.ClassConctructorException;
@@ -56,7 +55,6 @@ public class AnnotatedBeanDefinitionReader implements BeanDefinitionReader {
                 .beanClassName(aClass.getName())
                 .name(getBeanName(aClass))
                 .scope(getBeanScope(aClass))
-                .isLazy(isLazy(aClass))
                 .isPrimary(isPrimary(aClass))
                 .dependsOn(getDependsOn(aClass))
                 .order(getOrder(aClass))
@@ -90,10 +88,6 @@ public class AnnotatedBeanDefinitionReader implements BeanDefinitionReader {
 
     private boolean isPrimary(Class<?> aClass) {
         return aClass.isAnnotationPresent(Primary.class);
-    }
-
-    private boolean isLazy(Class<?> aClass) {
-        return aClass.isAnnotationPresent(Lazy.class);
     }
 
     private Scope getBeanScope(Class<?> aClass) {

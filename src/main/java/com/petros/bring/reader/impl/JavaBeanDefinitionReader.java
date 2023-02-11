@@ -45,7 +45,6 @@ public class JavaBeanDefinitionReader implements BeanDefinitionReader {
                 .beanClassName(method.getReturnType().getName())
                 .name(getBeanName(method))
                 .scope(getBeanScope(method))
-                .isLazy(isLazy(method))
                 .isPrimary(isPrimary(method))
                 .factoryBeanClass(method.getDeclaringClass())
                 .factoryMethod(method)
@@ -59,10 +58,6 @@ public class JavaBeanDefinitionReader implements BeanDefinitionReader {
 
     private boolean isPrimary(Method method) {
         return method.isAnnotationPresent(Primary.class);
-    }
-
-    private boolean isLazy(Method method) {
-        return method.isAnnotationPresent(Lazy.class);
     }
 
     private Scope getBeanScope(Method method) {
