@@ -56,6 +56,20 @@ public class JavadocExampleClass {
 }
 ```
 
+### @Qualifier
+
+@Qualifier is annotation that may be used on a field only to clarify which bean to inject from the context.
+
+Using with [@Autowired](#autowired) annotation.
+
+Usage example:
+```java
+public class JavadocExampleClass {
+    @Autowired
+    @Qualifier("distinctClassName")
+    public ExampleService exampleService;
+}
+```
 ### @Value
 
 @Value is an annotation that sets a value to a variable of a Class. There are 2 ways of usage:
