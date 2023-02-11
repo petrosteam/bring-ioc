@@ -1,7 +1,7 @@
 package com.petros.bring.reader;
 
-import java.util.Collection;
 import java.util.Optional;
+import java.util.PriorityQueue;
 import java.util.Set;
 
 /**
@@ -16,17 +16,11 @@ public interface BeanDefinitionRegistry {
      */
     void registerBeanDefinition(Class<?> beanType, BeanDefinition beanDefinition);
 
-    void registerBeanDefinitionAll(Set<BeanDefinition> beanDefinitions);
-
-    void removeBeanDefinition(String beanName);
-
     /**
      * Return a bean definition by bean name
      * @param beanName - name of bean definition
      */
     BeanDefinition getBeanDefinition(String beanName);
-
-    Class<?> getBeanTypeByName(String name);
 
     /**
      * Return a set of bean definitions by bean class
@@ -39,7 +33,7 @@ public interface BeanDefinitionRegistry {
      */
     String[] getBeanDefinitionNames();
 
-    Collection<BeanDefinition> getBeanDefinitions();
+    PriorityQueue<BeanDefinition> getBeanDefinitions();
 
     <T> Optional<BeanDefinition> getPrimaryBeanDefinition(Class<T> beanType);
 }
