@@ -1,5 +1,7 @@
 package com.petros.bring.reader;
 
+import java.lang.reflect.Method;
+
 /**
  * A bean definition describes the properties of the bean and rules of how it should be created
  */
@@ -34,4 +36,10 @@ public interface BeanDefinition {
      * Return an array of bean classes, current bean depends on
      */
     Class<?>[] getDependsOn();
+
+    Class<?> getFactoryBeanClass();
+
+    Method getFactoryMethod();
+
+    int getOrder();
 }

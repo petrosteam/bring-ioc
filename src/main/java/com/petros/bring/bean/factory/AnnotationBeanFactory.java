@@ -12,6 +12,7 @@ import com.petros.bring.reader.Scope;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -125,10 +126,18 @@ public class AnnotationBeanFactory implements BeanFactory {
                     beansByType.put(dependsOnClass, beanToInject);
                     log.trace("[{}] adding bean to inject {}", beanDefinition.getName(), clazz.getName());
                 }
+                if (beanDefinition.getFactoryMethod() != null) {
+                    log.trace("[{}] creating bean by method with parameters", beanDefinition.getName());
+                    return createBeanByMethod(beanDefinition, beansByType);
+                }
                 log.trace("[{}] creating bean with non-default constructor", beanDefinition.getName());
                 return (T) clazz.getConstructor(beansByType.keySet().toArray(new Class<?>[]{}))
                         .newInstance(beansByType.values().toArray());
             } else {
+                if (beanDefinition.getFactoryMethod() != null) {
+                    log.trace("[{}] creating bean by method without parameters", beanDefinition.getName());
+                    return createBeanByMethod(beanDefinition, null);
+                }
                 log.trace("[{}] creating bean with default constructor", beanDefinition.getName());
                 return (T) clazz.getConstructor().newInstance();
             }
@@ -137,6 +146,15 @@ public class AnnotationBeanFactory implements BeanFactory {
             log.error("[{}] Could not instantiate bean: {}", beanDefinition.getName(), e);
             throw new BeanCreationException(beanDefinition, e);
         }
+    }
+
+    private <T> T createBeanByMethod(BeanDefinition beanDefinition, LinkedHashMap<Object, Object> beansByType) throws IllegalAccessException, InvocationTargetException {
+        Object bean = getBean(beanDefinition.getFactoryBeanClass());
+        Method factoryMethod = beanDefinition.getFactoryMethod();
+        factoryMethod.setAccessible(true);
+        return beansByType != null
+                ? (T) factoryMethod.invoke(bean, beansByType.values().toArray())
+                : (T) factoryMethod.invoke(bean);
     }
 
     /**

@@ -8,6 +8,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.lang.reflect.Method;
+
 @EqualsAndHashCode
 @ToString
 @Setter
@@ -20,7 +22,10 @@ public class BeanDefinitionImpl implements BeanDefinition {
     private boolean isLazy;
     private boolean isPrimary;
     private Class<?>[] dependsOn;
-
+    private Class<?> factoryBeanClass;
+    private Method factoryMethod;
+    @Builder.Default
+    private int order = 99;
 
     @Override
     public String getName() {
@@ -50,5 +55,20 @@ public class BeanDefinitionImpl implements BeanDefinition {
     @Override
     public Class<?>[] getDependsOn() {
         return dependsOn;
+    }
+
+    @Override
+    public Class<?> getFactoryBeanClass() {
+        return factoryBeanClass;
+    }
+
+    @Override
+    public Method getFactoryMethod() {
+        return factoryMethod;
+    }
+
+    @Override
+    public int getOrder() {
+        return order;
     }
 }

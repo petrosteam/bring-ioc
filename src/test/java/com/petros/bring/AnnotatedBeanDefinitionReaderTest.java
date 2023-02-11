@@ -62,7 +62,7 @@ class AnnotatedBeanDefinitionReaderTest {
     @Order(4)
     @DisplayName("ConfigComplexService bean definition name")
     void checkConfigComplexServiceBeanDefinitionName() {
-        assertEquals(beanDefinitionRegistry.getBeanDefinition("configComplexService").getName(), "configComplexService");
+        assertEquals(beanDefinitionRegistry.getBeanDefinition("complexService").getName(), "complexService");
     }
 
     @Test

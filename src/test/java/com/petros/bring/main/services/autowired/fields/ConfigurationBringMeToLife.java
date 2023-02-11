@@ -1,17 +1,17 @@
 package com.petros.bring.main.services.autowired.fields;
 
-import com.petros.bring.annotations.Component;
+import com.petros.bring.annotations.Bean;
 import com.petros.bring.annotations.Configuration;
 
 @Configuration
 public class ConfigurationBringMeToLife {
-    @Component
-    public ConfigComplexService getComplexService() {
+    @Bean
+    public ConfigComplexService complexService() {
         return new ConfigComplexService();
     }
 
-    @Component(name = "koobik")
-    private ConfigSimpleService getSimpleService() {
+    @Bean(name = "koobik")
+    private ConfigSimpleService simpleService() {
         return new ConfigSimpleService();
     }
 }

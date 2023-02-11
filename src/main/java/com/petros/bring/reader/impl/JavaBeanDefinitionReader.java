@@ -1,9 +1,6 @@
 package com.petros.bring.reader.impl;
 
-import com.petros.bring.annotations.Component;
-import com.petros.bring.annotations.Configuration;
-import com.petros.bring.annotations.Lazy;
-import com.petros.bring.annotations.Primary;
+import com.petros.bring.annotations.*;
 import com.petros.bring.exception.BeanDefinitionStoreException;
 import com.petros.bring.reader.BeanDefinition;
 import com.petros.bring.reader.BeanDefinitionReader;
@@ -37,7 +34,7 @@ public class JavaBeanDefinitionReader implements BeanDefinitionReader {
         Set<Class<?>> annotatedClasses = reflections.getTypesAnnotatedWith(Configuration.class);
         annotatedClasses.stream()
                 .flatMap(aClass -> Arrays.stream(aClass.getDeclaredMethods()))
-                .filter(method -> method.isAnnotationPresent(Component.class))
+                .filter(method -> method.isAnnotationPresent(Bean.class))
                 .forEach(method -> beanDefinitionRegistry
                         .registerBeanDefinition(method.getReturnType(), createBeanDefinition(method)));
         return beanDefinitionRegistry.getBeanDefinitionNames().length;
@@ -50,7 +47,14 @@ public class JavaBeanDefinitionReader implements BeanDefinitionReader {
                 .scope(getBeanScope(method))
                 .isLazy(isLazy(method))
                 .isPrimary(isPrimary(method))
+                .factoryBeanClass(method.getDeclaringClass())
+                .factoryMethod(method)
+                .dependsOn(getDependsOn(method))
                 .build();
+    }
+
+    private Class<?>[] getDependsOn(Method method) {
+        return method.getParameterTypes();
     }
 
     private boolean isPrimary(Method method) {
@@ -62,12 +66,12 @@ public class JavaBeanDefinitionReader implements BeanDefinitionReader {
     }
 
     private Scope getBeanScope(Method method) {
-        return method.getAnnotation(Component.class).scope();
+        return method.getAnnotation(Bean.class).scope();
     }
 
     private String getBeanName(Method method) {
-        String name = method.getAnnotation(Component.class).name();
-        return StringUtils.isEmpty(name) ? StringUtils.uncapitalize(method.getReturnType().getSimpleName()) : name;
+        String name = method.getAnnotation(Bean.class).name();
+        return StringUtils.isEmpty(name) ? StringUtils.uncapitalize(method.getName()) : name;
     }
 
 

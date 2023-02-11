@@ -8,7 +8,6 @@ import com.petros.bring.reader.BeanDefinitionRegistry;
 import com.petros.bring.reader.Scope;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -33,27 +32,9 @@ public class BeanDefinitionRegistryImpl implements BeanDefinitionRegistry {
         beanDefinitionsByType.put(beanType, beanDefinition);
     }
 
-    public void registerBeanDefinitionAll(Set<BeanDefinition> beanDefinitions) {
-        beanDefinitionMap.putAll(beanDefinitions.stream()
-                .peek(this::validate)
-                .collect(Collectors.toMap(BeanDefinition::getName, Function.identity())));
-    }
-
-    @Override
-    public void removeBeanDefinition(String beanName) {
-        beanDefinitionMap.remove(beanName);
-    }
-
     @Override
     public BeanDefinition getBeanDefinition(String beanName) {
         return beanDefinitionMap.get(beanName);
-    }
-
-    public Class<?> getBeanTypeByName(String name) {
-        return beanDefinitionsByType.entrySet().stream()
-                .filter(entry -> entry.getValue().getName().equals(name))
-                .map(Map.Entry::getKey)
-                .findFirst().orElseThrow();
     }
 
     @Override
@@ -70,8 +51,10 @@ public class BeanDefinitionRegistryImpl implements BeanDefinitionRegistry {
     }
 
     @Override
-    public Collection<BeanDefinition> getBeanDefinitions() {
-        return beanDefinitionMap.values();
+    public PriorityQueue<BeanDefinition> getBeanDefinitions() {
+        PriorityQueue<BeanDefinition> queue = new PriorityQueue<>(Comparator.comparing(BeanDefinition::getOrder));
+        queue.addAll(beanDefinitionMap.values());
+        return queue;
     }
 
     void validate(BeanDefinition beanDefinition) {
@@ -83,16 +66,6 @@ public class BeanDefinitionRegistryImpl implements BeanDefinitionRegistry {
             throw new BeanDefinitionOverrideException(String.format(
                     "Cannot register bean definition [%s] for bean '%s': There is already [%s] bound.",
                     beanDefinition, beanDefinition.getName(), existingBean
-            ));
-        }
-    }
-
-    void validate(String beanName) {
-        var existingBean = beanDefinitionMap.get(beanName);
-        if (existingBean != null) {
-            throw new BeanDefinitionOverrideException(String.format(
-                    "Cannot register bean definition [%s] for bean '%s': There is already [%s] bound.",
-                    existingBean, existingBean.getName(), existingBean
             ));
         }
     }
