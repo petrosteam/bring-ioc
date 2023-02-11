@@ -6,6 +6,8 @@
 
 ## How to start ?
 
+* Clone GitHub repository by link [https://github.com/petrosteam/bring-ioc.git](https://github.com/petrosteam/bring-ioc.git)
+* Open the cloned repository in your IDE and run 'mvn clean install'.
 * Import to your Maven project dependency:
 
 ```<dependency>
@@ -14,12 +16,45 @@
   <version>1.0-SNAPSHOT</version>
   </dependency>
   ```
+
 * Create an instance of BeanFactory.class and set a path to package to scan as an argument.\
   ex.: BeanFactory beanFactory = Application.run("com.my.package")
 
 ### Context of Application is based on @Annotations over classes, fields and methods.
 
 ## Annotations
+
+### @Autowired
+
+@Autowired annotation allows to mark a field property or a method with only one class as parameter. 
+Marked variable or a parameter must be a class.
+
+Marked class will be taken from an application context loaded by com.petros.bring.bean.factory.BeanFactory. 
+Injected field of a method must be used in classes annotated with: Component or Configuration.
+To inject class with a certain name - use Qualifier.
+Example of field autowiring:
+```java
+@Component
+public class JavadocExampleClass { 
+    @Autowired 
+    public ExampleService exampleService; 
+}
+```
+Example of method autowiring:
+
+```java
+import com.petros.bring.annotations.Component;
+
+@Component
+public class JavadocExampleClass {
+    private ExampleService exampleService;
+
+    @Autowired
+    public void setExampleService(ExampleService exampleService) {
+        this.exampleService = exampleService;
+    }
+}
+```
 
 ### @Value
 
