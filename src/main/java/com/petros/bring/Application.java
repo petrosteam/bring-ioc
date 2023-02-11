@@ -72,6 +72,8 @@ public final class Application {
         log.trace("Loading internal bean definitions");
         var definitions = Arrays.stream(INTERNAL_PACKAGES).mapToInt(reader::loadBeanDefinitions).sum();
         log.trace("Loaded {} bean definitions", definitions);
-        return new AnnotationConfigApplicationContext(registry);
+        var context = new AnnotationConfigApplicationContext(registry);
+        context.register();
+        return context;
     }
 }
